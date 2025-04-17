@@ -1,32 +1,15 @@
-🧠 Concept Summary: Multi-Altitude View of Product Work
+# Multi-Altitude Product Roadmap
 
-I'm trying to build a visual system that helps understand product work at different levels of visibility, from strategy down to execution, especially as it relates to teams.
+This project explores a simple but powerful concept: helping product teams visualize their work at different **altitudes of visibility** — from high-level strategic goals to week-by-week execution. It’s designed to be useful for a single team to start, with room to scale across multiple streams.
 
-⸻
+## ✨ Core Idea
 
-**🎯 What I’m Trying to Build**
+Different stakeholders care about different levels of detail. This roadmap structure makes it easy to **zoom in or out** depending on what you need to see:
 
-I’m creating a view that lets me understand and communicate product work at different altitudes — from long-term strategic outcomes to short-term tactical bets.
+- **Zoomed Out**: Strategic Objective or Company Goal
+- **Middle Altitude**: Outcome Roadmap with Now / Near / Next
+- **Zoomed In**: Epic-level Bets and Initiatives linked to each outcome
 
-The core idea is that different stakeholders care about different levels of visibility. Some want to zoom out and see objectives or strategic outcomes; others want to zoom in on team-level initiatives or epic-level bets.
+Each *outcome* card acts as a bridge — it's shaped like a team’s focus area and cascades down to the detailed bets that deliver on it.
 
-Eventually, I want to support multiple teams or streams, but I need to get it working well for a single team/unit first.
-
-⸻
-
-🧱 Initial Structure (Single-Team View)
-
-Think of it as three connected levels:
-	1.	Zoomed Out: Objective / Strategic Outcome
-	•	High-level goals that a team is contributing to (quarterly OKRs or similar)
-	•	One level above the outcome roadmap
-	•	Optional to show
-	2.	Outcome Roadmap (Middle Altitude)
-	•	Core organizing view
-	•	Shows Now / Near / Next outcomes — these are higher-level efforts, possibly quarterly
-	•	Each outcome supports a zoomed-out objective
-	•	These are team-shaped, cross-functional focuses
-	3.	Zoomed In: Bets / Initiatives
-	•	Under each outcome, there are 3–6 “bets” (epics or initiatives) the team might be working on weekly or monthly
-	•	These are more actionable, detailed, and time-constrained
-	•	Eventually, might be linked to metrics, but not yet
+## 🧱 Structure

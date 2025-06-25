@@ -234,14 +234,7 @@ function Layout() {
                   {isPublicView ? 'Public Roadmap' : 'The Flour'}
                 </h1>
               </div>
-              <a
-                href="https://www.productaf.com/p/product-managers-are-like-flour-hear?r=2qc8t&utm_campaign=post&utm_medium=web&showWelcomeOnShare=false"
-                className="text-sm text-gray-500 hover:text-gray-700 italic pl-8"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                why flour?
-              </a>
+
             </div>
             <div className="flex gap-4 items-center">
               {!isOutcomesView && (
@@ -344,7 +337,7 @@ function Layout() {
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 <ZoomIn className="w-4 h-4 mr-2" />
-                Zoom in to Bets
+                Zoom in
               </Link>
             ) : (
               <Link
@@ -352,7 +345,7 @@ function Layout() {
                 className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
                 <ZoomOut className="w-4 h-4 mr-2" />
-                Zoom out to Outcomes
+                Zoom out
               </Link>
             )}
           </div>
@@ -375,6 +368,19 @@ function Layout() {
           />
         )}
       </main>
+      
+      <footer className="py-4 border-t border-gray-200 mt-8">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <a
+            href="https://www.productaf.com/p/product-managers-are-like-flour-hear?r=2qc8t&utm_campaign=post&utm_medium=web&showWelcomeOnShare=false"
+            className="text-sm text-gray-500 hover:text-gray-700 italic"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            why flour?
+          </a>
+        </div>
+      </footer>
     </div>
   );
 }

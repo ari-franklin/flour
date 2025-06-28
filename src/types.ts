@@ -86,7 +86,27 @@ export interface SuccessMetric {
 }
 
 // Types for the fractal view
-export type ViewLevel = 'executive' | 'management' | 'team';
+export type ViewLevel = 'executive' | 'management' | 'team' | 'roadmap';
+export type RoadmapItemType = 'objective' | 'outcome' | 'bet';
+
+export interface RoadmapItem {
+  id: string;
+  title: string;
+  description?: string;
+  type: RoadmapItemType;
+  status: 'now' | 'next' | 'later' | 'near';
+  team_id: string;
+  is_public: boolean;
+  created_at?: string;
+  updated_at?: string;
+  metrics?: Metric[];
+  // Additional type-specific fields
+  objective_id?: string;
+  outcome_id?: string;
+  executive_summary?: string;
+  management_summary?: string;
+  team_summary?: string;
+}
 
 export interface ViewConfig {
   level: ViewLevel;

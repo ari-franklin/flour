@@ -2,6 +2,50 @@ import React, { useMemo, ReactNode } from 'react';
 import { Metric, Team, Objective, Outcome, Bet } from '../types';
 import { calculateRollupValue } from '../utils/metricUtils';
 
+// Helper function to get the appropriate icon and color for metric type
+const getMetricTypeBadge = (metric: Metric) => {
+  const baseClasses = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mr-1';
+  
+  if (metric.isNorthStar) {
+    return (
+      <span className={`${baseClasses} bg-yellow-100 text-yellow-800`} title="North Star Metric">
+        ⭐ North Star
+      </span>
+    );
+  }
+  
+  const typeBadge = (
+    <span 
+      className={`${baseClasses} ${
+        metric.metricType === 'business' 
+          ? 'bg-purple-100 text-purple-800' 
+          : 'bg-blue-100 text-blue-800'
+      }`}
+    >
+      {metric.metricType === 'business' ? 'Business' : 'Product'}
+    </span>
+  );
+  
+  const timeframeBadge = (
+    <span 
+      className={`${baseClasses} ${
+        metric.timeframe === 'leading' 
+          ? 'bg-green-100 text-green-800' 
+          : 'bg-orange-100 text-orange-800'
+      }`}
+    >
+      {metric.timeframe === 'leading' ? 'Leading' : 'Lagging'}
+    </span>
+  );
+  
+  return (
+    <>
+      {typeBadge}
+      {timeframeBadge}
+    </>
+  );
+};
+
 interface MetricTreeViewProps {
   metrics: Metric[];
   teams: Team[];
@@ -108,9 +152,24 @@ const MetricTreeView: React.FC<MetricTreeViewProps> = ({
         <h3 className="text-lg font-semibold mb-2">{metric.name} Details</h3>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <p className="text-sm text-gray-600">Current Value: <span className="font-medium">{progress} {metric.unit || ''}</span></p>
-            <p className="text-sm text-gray-600">Target: <span className="font-medium">{target} {metric.unit || ''}</span></p>
-            <p className="text-sm text-gray-600">Progress: <span className="font-medium">{progressPercent}%</span></p>
+            <div className="mb-2">
+              {getMetricTypeBadge(metric)}
+            </div>
+            <p className="text-sm text-gray-600">
+              Type: <span className="font-medium capitalize">{metric.metricType} metric</span>
+            </p>
+            <p className="text-sm text-gray-600">
+              Timeframe: <span className="font-medium capitalize">{metric.timeframe} indicator</span>
+            </p>
+            <p className="text-sm text-gray-600">
+              Current Value: <span className="font-medium">{progress} {metric.unit || ''}</span>
+            </p>
+            <p className="text-sm text-gray-600">
+              Target: <span className="font-medium">{target} {metric.unit || ''}</span>
+            </p>
+            <p className="text-sm text-gray-600">
+              Progress: <span className="font-medium">{progressPercent}%</span>
+            </p>
             {team && (
               <p className="text-sm text-gray-600">
                 Team: <span className="font-medium" style={{ color: team.color }}>{team.name}</span>
@@ -192,6 +251,9 @@ const MetricTreeView: React.FC<MetricTreeViewProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <span className="font-medium">{metric.name}</span>
+              <div className="ml-2">
+                {getMetricTypeBadge(metric)}
+              </div>
               {isUnlinked && (
                 <span 
                   className="ml-1 text-yellow-600 text-lg" 

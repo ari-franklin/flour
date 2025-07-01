@@ -1,7 +1,7 @@
 import React from 'react';
 import { RoadmapItem } from '../../types';
 import BaseZoomView from './BaseZoomView';
-import { Target, BarChart2, Check } from 'lucide-react';
+import { Target, BarChart2, TrendingUp, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 // Mock teams - this should come from props or context in a real app
@@ -97,6 +97,38 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                       <p className="mt-2 text-gray-600">{objective.description}</p>
                     )}
                     
+                    {/* North Star Metrics */}
+                    {objective.metrics?.some(m => m.isNorthStar) && (
+                      <div className="mt-3">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">North Star Metrics</h4>
+                        <div className="space-y-2">
+                          {objective.metrics
+                            .filter(metric => metric.isNorthStar)
+                            .map(metric => (
+                              <div 
+                                key={metric.id}
+                                className="flex items-center justify-between text-sm bg-gray-50 p-2 rounded border border-gray-100 shadow-sm"
+                                title={metric.description}
+                              >
+                                <div className="flex items-center">
+                                  <div className="w-4 h-4 rounded-full bg-indigo-100 flex items-center justify-center mr-2">
+                                    <TrendingUp className="h-2.5 w-2.5 text-indigo-600" />
+                                  </div>
+                                  <span className="font-medium text-gray-700">{metric.name}</span>
+                                </div>
+                                <div className="flex items-center">
+                                  <span className={`font-medium ${(metric.current_value || 0) >= (metric.target_value || 0) ? 'text-green-600' : 'text-amber-600'}`}>
+                                    {metric.current_value?.toLocaleString()}{metric.unit}
+                                  </span>
+                                  <span className="mx-1 text-gray-400">/</span>
+                                  <span className="text-gray-500">{metric.target_value?.toLocaleString()}{metric.unit}</span>
+                                </div>
+                              </div>
+                            ))}
+                        </div>
+                      </div>
+                    )}
+                    
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="flex items-center text-sm text-gray-600">
                         <Check className="h-5 w-5 text-green-500 mr-2" />
@@ -105,7 +137,7 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                         </span>
                       </div>
                       
-                      {primaryMetric && (
+                      {primaryMetric && !primaryMetric.isNorthStar && (
                         <div className="flex items-center text-sm text-gray-600">
                           <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
                           <span>

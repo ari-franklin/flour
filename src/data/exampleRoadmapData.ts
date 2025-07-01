@@ -379,37 +379,51 @@ export const getConnectedData = () => {
   
   // Add metrics to each item
   const objectivesWithMetrics = exampleObjectives.map(obj => {
-    const metrics = allMetrics.filter(m => 
+    // Get direct objective metrics
+    const directMetrics = allMetrics.filter(m => 
       m.parent_type === 'objective' && m.parent_id === obj.id
     ).map(({ team, ...metric }) => metric as MetricWithoutTeam);
     
+    // Get all outcomes for this objective
+    const objectiveOutcomes = exampleOutcomes.filter(oc => oc.objective_id === obj.id);
+    
+    // Get all North Star metrics from outcomes under this objective
+    const northStarMetrics = objectiveOutcomes.flatMap(oc => 
+      allMetrics
+        .filter(m => m.parent_type === 'outcome' && m.parent_id === oc.id && m.isNorthStar)
+        .map(({ team, ...metric }) => ({
+          ...metric,
+          // Add a reference to the outcome it came from
+          description: `${metric.description} (from ${oc.title})`
+        } as MetricWithoutTeam))
+    );
+    
     return {
       ...obj,
-      metrics,
-      outcomes: exampleOutcomes
-        .filter(oc => oc.objective_id === obj.id)
-        .map(oc => {
-          const outcomeMetrics = allMetrics
-            .filter(m => m.parent_type === 'outcome' && m.parent_id === oc.id)
-            .map(({ team, ...metric }) => metric as MetricWithoutTeam);
-            
-          return {
-            ...oc,
-            metrics: outcomeMetrics,
-            bets: exampleBets
-              .filter(bet => bet.outcome_id === oc.id)
-              .map(bet => {
-                const betMetrics = allMetrics
-                  .filter(m => m.parent_type === 'bet' && m.parent_id === bet.id)
-                  .map(({ team, ...metric }) => metric as MetricWithoutTeam);
-                  
-                return {
-                  ...bet,
-                  metrics: betMetrics,
-                };
-              }),
-          };
-        }),
+      // Combine direct metrics with North Star metrics from outcomes
+      metrics: [...directMetrics, ...northStarMetrics],
+      outcomes: objectiveOutcomes.map(oc => {
+        const outcomeMetrics = allMetrics
+          .filter(m => m.parent_type === 'outcome' && m.parent_id === oc.id)
+          .map(({ team, ...metric }) => metric as MetricWithoutTeam);
+          
+        return {
+          ...oc,
+          metrics: outcomeMetrics,
+          bets: exampleBets
+            .filter(bet => bet.outcome_id === oc.id)
+            .map(bet => {
+              const betMetrics = allMetrics
+                .filter(m => m.parent_type === 'bet' && m.parent_id === bet.id)
+                .map(({ team, ...metric }) => metric as MetricWithoutTeam);
+                
+              return {
+                ...bet,
+                metrics: betMetrics,
+              };
+            }),
+        };
+      }),
     };
   });
 

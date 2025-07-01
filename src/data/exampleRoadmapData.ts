@@ -14,7 +14,7 @@ export const exampleTeams: Team[] = [
   { id: 'team-4', name: 'Marketing', color: 'bg-yellow-500' },
 ];
 
-// Helper function to create metrics
+// Helper function to create metrics with relationships
 const createMetric = (
   id: string, 
   name: string, 
@@ -22,7 +22,16 @@ const createMetric = (
   target: string, 
   parentId: string, 
   parentType: ParentType, 
-  teamId: string
+  teamId: string,
+  options: {
+    child_metrics?: string[];
+    parent_metric_id?: string;
+    contribution_type?: 'direct' | 'weighted' | 'formula';
+    weight?: number;
+    formula?: string;
+    unit?: string;
+    description?: string;
+  } = {}
 ): Omit<Metric, 'team'> & { team?: Team } => {
   const level: MetricLevel = 
     parentType === 'objective' ? 'executive' : 
@@ -34,7 +43,7 @@ const createMetric = (
     description: `Target ${target} for ${name}`,
     current_value: parseFloat(current.replace(/[^0-9.]/g, '')),
     target_value: parseFloat(target.replace(/[^0-9.]/g, '')),
-    unit: name.includes('Time') ? 'ms' : name.includes('Rate') || name.includes('CSAT') ? '%' : '',
+    unit: options.unit || (name.includes('Time') ? 'ms' : name.includes('Rate') || name.includes('CSAT') || name.includes('%') ? '%' : ''),
     level,
     parent_type: parentType,
     parent_id: parentId,
@@ -42,6 +51,7 @@ const createMetric = (
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     team: exampleTeams.find(t => t.id === teamId),
+    ...options
   };
 };
 
@@ -186,38 +196,140 @@ export const exampleObjectives: Objective[] = [
   },
 ];
 
-// Generate metrics for all items
+// Generate metrics for all items with hierarchical relationships
 const allMetrics = [
-  // Metrics for Objective 1
-  createMetric('m-ob1-1', 'NPS', '42', '50', 'objective-1', 'objective', 'team-1'),
-  createMetric('m-ob1-2', 'CSAT', '85', '90', 'objective-1', 'objective', 'team-1'),
+  // ===== Company-Wide Metrics =====
+  createMetric('m-company-1', 'Revenue Growth', '5', '10', 'company', 'objective', 'team-1', {
+    child_metrics: ['m-exec-1', 'm-exec-2'],
+    formula: 'weighted_average',
+    unit: '%',
+    description: 'Year-over-year revenue growth target'
+  }),
   
-  // Metrics for Outcome 1
-  createMetric('m-oc1-1', 'Activation Rate', '65', '75', 'outcome-1', 'outcome', 'team-1'),
-  createMetric('m-oc1-2', 'Day 7 Retention', '35', '40', 'outcome-1', 'outcome', 'team-1'),
+  // ===== Objective 1: Improve User Experience =====
+  createMetric('m-exec-1', 'User Experience Impact', '65', '85', 'objective-1', 'objective', 'team-1', {
+    child_metrics: ['m-mgmt-1', 'm-mgmt-2'],
+    parent_metric_id: 'm-company-1',
+    contribution_type: 'weighted',
+    weight: 70,
+    unit: '%',
+    description: 'Impact of user experience improvements on revenue'
+  }),
   
-  // Metrics for Outcome 2
-  createMetric('m-oc2-1', 'Page Load Time', '1200', '1000', 'outcome-2', 'outcome', 'team-2'),
-  createMetric('m-oc2-2', 'API Response Time', '450', '300', 'outcome-2', 'outcome', 'team-2'),
+  // Management Level Metrics (Outcome Level)
+  // Outcome 1: Enhance User Onboarding
+  createMetric('m-mgmt-1', 'Onboarding Completion', '60', '85', 'outcome-1', 'outcome', 'team-1', {
+    child_metrics: ['m-team-1', 'm-team-2', 'm-b2-1'],
+    parent_metric_id: 'm-exec-1',
+    contribution_type: 'weighted',
+    weight: 60,
+    unit: '%',
+    description: 'Metrics related to user onboarding success'
+  }),
   
-  // Metrics for Outcome 3
-  createMetric('m-oc3-1', 'EMEA Signups', '0', '500', 'outcome-3', 'outcome', 'team-1'),
+  // Outcome 2: Improve Core Performance
+  createMetric('m-mgmt-2', 'System Performance', '70', '95', 'outcome-2', 'outcome', 'team-2', {
+    child_metrics: ['m-team-3', 'm-team-4', 'm-b3-1'],
+    parent_metric_id: 'm-exec-1',
+    contribution_type: 'weighted',
+    weight: 40,
+    unit: '%',
+    description: 'Technical performance metrics'
+  }),
   
-  // Metrics for Outcome 4
-  createMetric('m-oc4-1', 'Deployment Frequency', '30', '50', 'outcome-4', 'outcome', 'team-2'),
-  createMetric('m-oc4-2', 'Build Time', '15', '5', 'outcome-4', 'outcome', 'team-2'),
+  // ===== Objective 2: Expand Market Reach =====
+  createMetric('m-exec-2', 'Market Expansion', '0', '90', 'objective-2', 'objective', 'team-1', {
+    child_metrics: ['m-mgmt-3'],
+    parent_metric_id: 'm-company-1',
+    contribution_type: 'weighted',
+    weight: 30,
+    unit: '%',
+    description: 'Contribution to revenue growth from market expansion'
+  }),
   
-  // Metrics for Bet 1
-  createMetric('m-b1-1', 'Tour Completion', '30', '100', 'bet-1', 'bet', 'team-2'),
+  // Outcome 3: Launch in EMEA Region
+  createMetric('m-mgmt-3', 'EMEA Launch Progress', '0', '100', 'outcome-3', 'outcome', 'team-1', {
+    child_metrics: ['m-b4-1'],
+    parent_metric_id: 'm-exec-2',
+    contribution_type: 'direct',
+    unit: '%',
+    description: 'Progress on EMEA region launch'
+  }),
   
-  // Metrics for Bet 2
-  createMetric('m-b2-1', 'Email Open Rate', '25', '40', 'bet-2', 'bet', 'team-4'),
+  // ===== Objective 3: Increase Operational Efficiency =====
+  createMetric('m-exec-3', 'Operational Efficiency', '50', '90', 'objective-3', 'objective', 'team-2', {
+    child_metrics: ['m-mgmt-4'],
+    unit: '%',
+    description: 'Overall operational efficiency score'
+  }),
   
-  // Metrics for Bet 3
-  createMetric('m-b3-1', 'Query Response Time', '350', '200', 'bet-3', 'bet', 'team-2'),
+  // Outcome 4: Implement CI/CD Pipeline
+  createMetric('m-mgmt-4', 'CI/CD Implementation', '30', '100', 'outcome-4', 'outcome', 'team-2', {
+    parent_metric_id: 'm-exec-3',
+    contribution_type: 'direct',
+    unit: '%',
+    description: 'Progress on CI/CD pipeline implementation'
+  }),
   
-  // Metrics for Bet 4
-  createMetric('m-b4-1', 'Localization Coverage', '0', '95', 'bet-4', 'bet', 'team-1'),
+  // ===== Team Level Metrics (Bet Level) =====
+  // Bet 1: Implement interactive product tour
+  createMetric('m-team-1', 'Product Tour Completion', '65', '90', 'bet-1', 'bet', 'team-1', {
+    parent_metric_id: 'm-mgmt-1',
+    contribution_type: 'weighted',
+    weight: 50,
+    unit: '%',
+    description: 'Percentage of new users who complete the product tour'
+  }),
+  
+  createMetric('m-team-2', 'Feature Adoption', '35', '60', 'bet-1', 'bet', 'team-1', {
+    parent_metric_id: 'm-mgmt-1',
+    contribution_type: 'weighted',
+    weight: 50,
+    unit: '%',
+    description: 'Key features used after completing the tour'
+  }),
+  
+  // Bet 2: Redesign welcome email sequence
+  createMetric('m-b2-1', 'Email Engagement', '25', '50', 'bet-2', 'bet', 'team-4', {
+    parent_metric_id: 'm-mgmt-1',
+    contribution_type: 'weighted',
+    weight: 30,
+    unit: '%',
+    description: 'Open and click-through rates for welcome emails'
+  }),
+  
+  // Bet 3: Optimize database queries
+  createMetric('m-team-3', 'Query Performance', '80', '95', 'bet-3', 'bet', 'team-2', {
+    parent_metric_id: 'm-mgmt-2',
+    contribution_type: 'weighted',
+    weight: 40,
+    unit: '%',
+    description: 'Performance score of optimized queries'
+  }),
+  
+  createMetric('m-team-4', 'System Uptime', '99.5', '99.95', 'bet-3', 'bet', 'team-2', {
+    parent_metric_id: 'm-mgmt-2',
+    contribution_type: 'weighted',
+    weight: 30,
+    unit: '%',
+    description: 'System availability percentage'
+  }),
+  
+  createMetric('m-b3-1', 'Query Response Time', '350', '200', 'bet-3', 'bet', 'team-2', {
+    parent_metric_id: 'm-mgmt-2',
+    contribution_type: 'weighted',
+    weight: 30,
+    unit: 'ms',
+    description: 'Average response time for database queries'
+  }),
+  
+  // Bet 4: Localize product for European markets
+  createMetric('m-b4-1', 'Localization Coverage', '0', '95', 'bet-4', 'bet', 'team-1', {
+    parent_metric_id: 'm-mgmt-3',
+    contribution_type: 'direct',
+    unit: '%',
+    description: 'Percentage of UI and content localized for target markets'
+  })
 ] as const;
 
 // Helper function to convert items to RoadmapItem format
@@ -363,12 +475,28 @@ export const getConnectedData = () => {
     })
   ];
 
+  // Process metrics to ensure they have all required fields
+  const processedMetrics = allMetrics.map(metric => {
+    const { team, ...rest } = metric;
+    return {
+      ...rest,
+      // Ensure all metrics have a valid parent_type, defaulting to 'objective' for root metrics
+      parent_type: rest.parent_type || (rest.parent_id ? 'objective' : 'objective'),
+      // Ensure all metrics have a valid parent_id, defaulting to empty string
+      parent_id: rest.parent_id || '',
+      // Ensure all metrics have a valid level
+      level: rest.level || 'executive',
+      // Ensure all metrics have a valid unit
+      unit: rest.unit || (rest.name.includes('%') ? '%' : '')
+    } as MetricWithoutTeam;
+  });
+
   return {
     objectives: objectivesWithMetrics,
     outcomes: outcomesWithMetrics,
     bets: betsWithMetrics,
     teams: exampleTeams,
-    metrics: allMetrics.map(({ team, ...metric }) => metric as MetricWithoutTeam),
+    metrics: processedMetrics,
     roadmapItems,
   };
 };

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-export type ZoomLevel = 'executive' | 'management' | 'team';
+export type ZoomLevel = 'executive' | 'management' | 'team' | 'metrics';
 
 interface ZoomContextType {
   zoomLevel: ZoomLevel;
@@ -13,11 +13,15 @@ interface ZoomContextType {
   isExecutiveView: boolean;
   isManagementView: boolean;
   isTeamView: boolean;
+  isMetricsView: boolean;
 }
 
 const ZoomContext = createContext<ZoomContextType | undefined>(undefined);
 
+// These are the zoom levels that participate in the zoom in/out flow
 const zoomLevels: ZoomLevel[] = ['executive', 'management', 'team'];
+// All possible zoom levels including special views
+const allZoomLevels: ZoomLevel[] = [...zoomLevels, 'metrics'];
 
 interface ZoomProviderProps {
   children: ReactNode;
@@ -32,43 +36,39 @@ export const ZoomProvider: React.FC<ZoomProviderProps> = ({
   const navigate = useNavigate();
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>(initialLevel);
 
-  // Initialize from URL if present
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const viewParam = params.get('view') as ZoomLevel;
-    if (viewParam && zoomLevels.includes(viewParam)) {
-      setZoomLevel(viewParam);
-    }
-  }, [location.search]);
+  // Zoom level is now controlled by the route in App.tsx
 
-  const currentLevelIndex = zoomLevels.indexOf(zoomLevel);
-  const canZoomIn = currentLevelIndex < zoomLevels.length - 1;
-  const canZoomOut = currentLevelIndex > 0;
+  // Only calculate zoom in/out for non-metrics views
+  const currentIndex = zoomLevel === 'metrics' ? -1 : zoomLevels.indexOf(zoomLevel);
+  const canZoomIn = zoomLevel !== 'metrics' && currentIndex < zoomLevels.length - 1;
+  const canZoomOut = zoomLevel !== 'metrics' && currentIndex > 0;
   const isExecutiveView = zoomLevel === 'executive';
   const isManagementView = zoomLevel === 'management';
   const isTeamView = zoomLevel === 'team';
+  const isMetricsView = zoomLevel === 'metrics';
 
   const updateZoomLevel = useCallback((newLevel: ZoomLevel) => {
     setZoomLevel(newLevel);
-    // Update URL
-    const params = new URLSearchParams(location.search);
-    params.set('view', newLevel);
-    navigate({ search: params.toString() }, { replace: true });
-  }, [location.search, navigate]);
+    // Navigation is now handled by the ZoomControls component
+  }, []);
 
   const zoomIn = useCallback(() => {
     if (canZoomIn) {
-      const nextLevel = zoomLevels[currentLevelIndex + 1];
-      updateZoomLevel(nextLevel);
+      const nextLevel = zoomLevels[currentIndex + 1];
+      if (nextLevel) {
+        updateZoomLevel(nextLevel);
+      }
     }
-  }, [canZoomIn, currentLevelIndex, updateZoomLevel]);
+  }, [canZoomIn, currentIndex, updateZoomLevel]);
 
   const zoomOut = useCallback(() => {
     if (canZoomOut) {
-      const prevLevel = zoomLevels[currentLevelIndex - 1];
-      updateZoomLevel(prevLevel);
+      const prevLevel = zoomLevels[currentIndex - 1];
+      if (prevLevel) {
+        updateZoomLevel(prevLevel);
+      }
     }
-  }, [canZoomOut, currentLevelIndex, updateZoomLevel]);
+  }, [canZoomOut, currentIndex, updateZoomLevel]);
 
   return (
     <ZoomContext.Provider
@@ -82,6 +82,7 @@ export const ZoomProvider: React.FC<ZoomProviderProps> = ({
         isExecutiveView,
         isManagementView,
         isTeamView,
+        isMetricsView,
       }}
     >
       {children}

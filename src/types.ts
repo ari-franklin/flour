@@ -65,6 +65,12 @@ export interface Metric {
   created_at?: string;
   updated_at?: string;
   team?: Pick<Team, 'id' | 'name' | 'color'>;
+  // New fields for metric relationships
+  child_metrics?: string[]; // IDs of child metrics that roll up to this one
+  parent_metric_id?: string; // ID of parent metric this rolls up to
+  contribution_type?: 'direct' | 'weighted' | 'formula';
+  weight?: number; // For weighted contributions
+  formula?: string; // For formula-based contributions
 }
 
 export interface Column {

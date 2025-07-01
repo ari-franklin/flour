@@ -1,49 +1,74 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useZoom } from '../contexts/ZoomContext';
-import { ZoomIn, ZoomOut, LayoutDashboard, Users, Target, Maximize2 } from 'lucide-react';
-
-type ZoomLevel = 'executive' | 'management' | 'team';
+import { useNavigate, Link } from 'react-router-dom';
+import { useZoom, ZoomLevel } from '../contexts/ZoomContext';
+import { ZoomIn, ZoomOut, LayoutDashboard, Users, Target, Maximize2, BarChart2 } from 'lucide-react';
 
 type ZoomLevelConfig = {
   label: string;
   icon: React.ReactNode;
   description: string;
+  path: string;
 };
 
 const zoomLevelConfigs: Record<ZoomLevel, ZoomLevelConfig> = {
   executive: {
     label: 'Executive',
     icon: <LayoutDashboard className="h-4 w-4" />,
-    description: 'High-level objectives'
+    description: 'High-level objectives',
+    path: '/'
   },
   management: {
     label: 'Management',
     icon: <Target className="h-4 w-4" />,
-    description: 'Team objectives & outcomes'
+    description: 'Team objectives & outcomes',
+    path: '/management'
   },
   team: {
     label: 'Team',
     icon: <Users className="h-4 w-4" />,
-    description: 'Detailed tasks & bets'
+    description: 'Detailed tasks & bets',
+    path: '/team'
+  },
+  metrics: {
+    label: 'Metrics',
+    icon: <BarChart2 className="h-4 w-4" />,
+    description: 'View all metrics',
+    path: '/metrics'
   }
 };
 
 const ZoomControls: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const { zoomIn, zoomOut, canZoomIn, canZoomOut, zoomLevel, setZoomLevel } = useZoom();
   
-  const currentConfig = zoomLevelConfigs[zoomLevel as ZoomLevel];
-  const zoomLevels = Object.keys(zoomLevelConfigs) as ZoomLevel[];
+  const currentConfig = zoomLevelConfigs[zoomLevel];
+  const zoomLevels = (Object.keys(zoomLevelConfigs) as ZoomLevel[]).filter(level => level !== 'metrics');
 
   const handleZoomChange = (newLevel: ZoomLevel) => {
-    setZoomLevel(newLevel);
-    // Update URL without page reload
-    const params = new URLSearchParams(location.search);
-    params.set('view', newLevel);
-    navigate({ search: params.toString() }, { replace: true });
+    // Only navigate if we're not already on the target level
+    if (newLevel !== zoomLevel) {
+      // Update the URL based on the zoom level
+      navigate(zoomLevelConfigs[newLevel].path);
+      
+      // The zoom level will be updated by the effect in App.tsx
+      // when the route changes, so we don't need to call setZoomLevel here
+    }
   };
+
+  // Show a simplified view for metrics
+  if (zoomLevel === 'metrics') {
+    return (
+      <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md transition-colors"
+        >
+          <LayoutDashboard className="h-4 w-4" />
+          <span>Back to Roadmap</span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center space-x-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">

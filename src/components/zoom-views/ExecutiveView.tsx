@@ -48,10 +48,9 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
     };
   };
 
-  // Get primary metric for an objective
-  const getPrimaryMetric = (objective: any) => {
-    const metrics = objective.metrics || [];
-    return metrics.find((m: any) => m.level === 'executive') || metrics[0];
+  // Get all metrics for an objective
+  const getMetrics = (objective: any) => {
+    return objective.metrics || [];
   };
   
   // Calculate progress percentage
@@ -70,7 +69,6 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
           const outcomes = getOutcomes(objective.id);
           const { total, achieved, inProgress } = countOutcomesByStatus(outcomes);
           const progress = calculateProgress(achieved, total);
-          const primaryMetric = getPrimaryMetric(objective);
           const team = exampleTeams.find(t => t.id === objective.team_id);
 
           return (
@@ -137,16 +135,39 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                         </span>
                       </div>
                       
-                      {primaryMetric && !primaryMetric.isNorthStar && (
-                        <div className="flex items-center text-sm text-gray-600">
-                          <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
-                          <span>
-                            {primaryMetric.name}: {primaryMetric.current_value}
-                            {primaryMetric.unit} of {primaryMetric.target_value}
-                            {primaryMetric.unit}
-                          </span>
-                        </div>
-                      )}
+                      {(() => {
+                        // Get all metrics and filter for business metrics
+                        const metrics = getMetrics(objective);
+                        const businessMetrics = metrics.filter((m: any) => m.metricType === 'business');
+                        const nonNorthStarBusinessMetrics = businessMetrics.filter((m: any) => !m.isNorthStar);
+                        
+                        // If we have business metrics that aren't North Star, show them
+                        if (nonNorthStarBusinessMetrics.length > 0) {
+                          return nonNorthStarBusinessMetrics.map((metric: any) => (
+                            <div key={metric.id} className="flex items-center text-sm text-gray-600">
+                              <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
+                              <span>
+                                {metric.name}: {metric.current_value}{metric.unit} of {metric.target_value}{metric.unit}
+                              </span>
+                            </div>
+                          ));
+                        }
+                        
+                        // Fallback to any non-North Star metrics if no business metrics found
+                        const nonNorthStarMetrics = metrics.filter((m: any) => !m.isNorthStar);
+                        if (nonNorthStarMetrics.length > 0) {
+                          return nonNorthStarMetrics.map((metric: any) => (
+                            <div key={metric.id} className="flex items-center text-sm text-gray-600">
+                              <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
+                              <span>
+                                {metric.name}: {metric.current_value}{metric.unit} of {metric.target_value}{metric.unit}
+                              </span>
+                            </div>
+                          ));
+                        }
+                        
+                        return null;
+                      })()}
                       
                       <div className="flex items-center text-sm text-gray-600">
                         <span>{total} total outcomes</span>

@@ -31,16 +31,27 @@ const createMetric = (
     formula?: string;
     unit?: string;
     description?: string;
+    metricType?: 'business' | 'product';
+    timeframe?: 'leading' | 'lagging';
+    isNorthStar?: boolean;
   } = {}
 ): Omit<Metric, 'team'> & { team?: Team } => {
   const level: MetricLevel = 
     parentType === 'objective' ? 'executive' : 
     parentType === 'outcome' ? 'management' : 'team';
     
+  // Determine if this is a business metric (only Revenue Growth for now)
+  const isBusinessMetric = name.toLowerCase().includes('revenue') || 
+                         name.toLowerCase().includes('growth') ||
+                         options.metricType === 'business';
+  
+  // Default to lagging for business metrics, leading for others
+  const defaultTimeframe = isBusinessMetric ? 'lagging' : 'leading';
+  
   return {
     id,
     name,
-    description: `Target ${target} for ${name}`,
+    description: options.description || `Target ${target} for ${name}`,
     current_value: parseFloat(current.replace(/[^0-9.]/g, '')),
     target_value: parseFloat(target.replace(/[^0-9.]/g, '')),
     unit: options.unit || (name.includes('Time') ? 'ms' : name.includes('Rate') || name.includes('CSAT') || name.includes('%') ? '%' : ''),
@@ -48,6 +59,8 @@ const createMetric = (
     parent_type: parentType,
     parent_id: parentId,
     team_id: teamId,
+    metricType: options.metricType || (isBusinessMetric ? 'business' : 'product'),
+    timeframe: options.timeframe || defaultTimeframe,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     team: exampleTeams.find(t => t.id === teamId),
@@ -203,7 +216,9 @@ const allMetrics = [
     child_metrics: ['m-exec-1', 'm-exec-2'],
     formula: 'weighted_average',
     unit: '%',
-    description: 'Year-over-year revenue growth target'
+    description: 'Year-over-year revenue growth target',
+    metricType: 'business',
+    timeframe: 'lagging'
   }),
   
   // ===== Objective 1: Improve User Experience =====
@@ -377,6 +392,11 @@ export const getConnectedData = () => {
   // Create a type-safe version of metrics without the team property
   type MetricWithoutTeam = Omit<Metric, 'team'>;
   
+  // Get company-wide business metrics
+  const companyBusinessMetrics = allMetrics.filter(m => 
+    m.parent_type === 'objective' && m.parent_id === 'company' && m.metricType === 'business'
+  ).map(({ team, ...metric }) => metric as MetricWithoutTeam);
+  
   // Add metrics to each item
   const objectivesWithMetrics = exampleObjectives.map(obj => {
     // Get direct objective metrics
@@ -398,10 +418,25 @@ export const getConnectedData = () => {
         } as MetricWithoutTeam))
     );
     
+    // Get business metrics specific to this objective
+    const objectiveBusinessMetrics = allMetrics.filter(m => 
+      m.parent_type === 'objective' && m.parent_id === obj.id && m.metricType === 'business'
+    ).map(({ team, ...metric }) => metric as MetricWithoutTeam);
+    
+    // Combine all relevant metrics
+    const allRelevantMetrics = [
+      ...companyBusinessMetrics, // Include company-wide business metrics
+      ...objectiveBusinessMetrics, // Include objective-specific business metrics
+      ...directMetrics.filter(m => m.metricType !== 'business'), // Include non-business direct metrics
+      ...northStarMetrics // Include North Star metrics
+    ];
+    
     return {
       ...obj,
-      // Combine direct metrics with North Star metrics from outcomes
-      metrics: [...directMetrics, ...northStarMetrics],
+      // Combine all relevant metrics, removing duplicates by ID
+      metrics: allRelevantMetrics.filter((metric, index, self) => 
+        index === self.findIndex(m => m.id === metric.id)
+      ),
       outcomes: objectiveOutcomes.map(oc => {
         const outcomeMetrics = allMetrics
           .filter(m => m.parent_type === 'outcome' && m.parent_id === oc.id)

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { getConnectedData } from '../data/exampleRoadmapData';
 import ExecutiveView from './zoom-views/ExecutiveView';
 import ManagementView from './zoom-views/ManagementView';
@@ -13,8 +13,38 @@ interface ExampleRoadmapProps {
 }
 
 export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => {
+  const { objectiveId } = useParams<{ objectiveId?: string }>();
+  const location = useLocation();
   const { roadmapItems, metrics, teams, objectives, outcomes, bets } = getConnectedData();
   const [selectedMetricId, setSelectedMetricId] = useState<string>();
+  const [expandedObjectives, setExpandedObjectives] = useState<Set<string>>(new Set());
+
+  // Auto-expand objective if objectiveId is provided
+  useEffect(() => {
+    if (objectiveId) {
+      setExpandedObjectives(new Set([objectiveId]));
+      
+      // If we're not already in management view, navigate to it
+      if (zoomLevel !== 'management') {
+        // Use a small timeout to ensure the view has updated before scrolling
+        const timer = setTimeout(() => {
+          const element = document.getElementById(`objective-${objectiveId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Add a temporary highlight
+            element.classList.add('ring-2', 'ring-indigo-500', 'ring-offset-2');
+            setTimeout(() => {
+              element.classList.remove('ring-2', 'ring-indigo-500', 'ring-offset-2');
+            }, 2000);
+          }
+        }, 100);
+        return () => clearTimeout(timer);
+      }
+    } else if (location.pathname === '/outcomes' && expandedObjectives.size > 0) {
+      // Clear expanded objectives when navigating back to the main outcomes page
+      setExpandedObjectives(new Set());
+    }
+  }, [objectiveId, location.pathname, zoomLevel]);
 
   // Handle metric selection
   const handleSelectMetric = (metricId: string) => {
@@ -55,7 +85,21 @@ export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => 
         </div>
         
         {zoomLevel === 'executive' && <ExecutiveView items={roadmapItems} />}
-        {zoomLevel === 'management' && <ManagementView items={roadmapItems} />}
+        {zoomLevel === 'management' && (
+          <ManagementView 
+            items={roadmapItems} 
+            expandedObjectives={expandedObjectives}
+            onToggleObjective={(id) => {
+              const newExpanded = new Set(expandedObjectives);
+              if (newExpanded.has(id)) {
+                newExpanded.delete(id);
+              } else {
+                newExpanded.add(id);
+              }
+              setExpandedObjectives(newExpanded);
+            }}
+          />
+        )}
         {zoomLevel === 'team' && <TeamView items={roadmapItems} />}
       </div>
     );

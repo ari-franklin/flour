@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RoadmapItem } from '../../types';
 import BaseZoomView from './BaseZoomView';
 import { Target, ChevronDown, ChevronRight, Users, BarChart2, TrendingUp, Target as TargetIcon, Gauge } from 'lucide-react';
 
 interface ManagementViewProps {
   items: RoadmapItem[];
+  expandedObjectives: Set<string>;
+  onToggleObjective: (id: string) => void;
 }
 
-const ManagementView: React.FC<ManagementViewProps> = ({ items }) => {
-  const [expandedObjectives, setExpandedObjectives] = useState<Set<string>>(new Set());
-  
+const ManagementView: React.FC<ManagementViewProps> = ({ items, expandedObjectives, onToggleObjective }) => {
   // Filter for management-level items (objectives, outcomes, and bets)
   const objectives = items.filter(item => item.type === 'objective');
   const outcomes = items.filter(item => item.type === 'outcome');
@@ -28,17 +28,6 @@ const ManagementView: React.FC<ManagementViewProps> = ({ items }) => {
       index === self.findIndex(m => m.id === metric.id)
     );
   };
-  
-  // Toggle objective expansion
-  const toggleObjective = (id: string) => {
-    const newExpanded = new Set(expandedObjectives);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedObjectives(newExpanded);
-  };
 
   return (
     <BaseZoomView
@@ -52,10 +41,14 @@ const ManagementView: React.FC<ManagementViewProps> = ({ items }) => {
           const isExpanded = expandedObjectives.has(objective.id);
           
           return (
-            <div key={objective.id} className="border border-gray-200 rounded-lg overflow-hidden">
+            <div 
+              key={objective.id} 
+              id={`objective-${objective.id}`}
+              className="border border-gray-200 rounded-lg overflow-hidden transition-all duration-200"
+            >
               <div 
                 className="bg-white p-4 hover:bg-gray-50 cursor-pointer flex justify-between items-center"
-                onClick={() => toggleObjective(objective.id)}
+                onClick={() => onToggleObjective(objective.id)}
               >
                 <div className="flex items-center">
                   <div className="flex-shrink-0 bg-indigo-100 p-2 rounded-md mr-4">

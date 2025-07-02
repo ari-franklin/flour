@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { ZoomProvider, useZoom } from './contexts/ZoomContext';
-import ZoomControls from './components/ZoomControls';
 import { Toaster } from 'react-hot-toast';
 import { ExampleRoadmap } from './components/ExampleRoadmap';
 
@@ -83,10 +82,14 @@ const AppContent: React.FC = () => {
             </div>
           } />
           <Route path="/management" element={<ExampleRoadmap zoomLevel="management" />} />
-          <Route path="/team" element={<ExampleRoadmap zoomLevel="team" />} />
-          <Route path="/team/outcome/:outcomeId" element={<ExampleRoadmap zoomLevel="team" />} />
-          <Route path="/team/outcome/:outcomeId/bet/:betId" element={<ExampleRoadmap zoomLevel="team" />} />
-          <Route path="/outcomes" element={<ExampleRoadmap zoomLevel="management" />} />
+          <Route path="/team" element={<ExampleRoadmap zoomLevel="team" />}>
+            <Route path="outcome/:outcomeId" element={<ExampleRoadmap zoomLevel="team" />}>
+              <Route path="bet/:betId" element={<ExampleRoadmap zoomLevel="team" />} />
+            </Route>
+          </Route>
+          <Route path="/outcomes" element={<ExampleRoadmap zoomLevel="management" />}>
+            <Route path=":objectiveId" element={<ExampleRoadmap zoomLevel="management" />} />
+          </Route>
           <Route path="/public" element={<ExampleRoadmap zoomLevel="executive" isPublicView />} />
           <Route path="/" element={<ExampleRoadmap zoomLevel="executive" />} />
         </Routes>

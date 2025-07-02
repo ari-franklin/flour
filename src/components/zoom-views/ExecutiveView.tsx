@@ -128,11 +128,44 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                     )}
                     
                     <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <Check className="h-5 w-5 text-green-500 mr-2" />
-                        <span>
-                          {achieved} achieved • {inProgress} in progress
-                        </span>
+                      <div className="flex flex-wrap items-center gap-2 md:gap-1.5 text-sm text-gray-600">
+                        <div className="flex items-center bg-green-50 px-2.5 py-1 rounded-full whitespace-nowrap">
+                          <Check className="h-4 w-4 text-green-600 mr-1.5 flex-shrink-0" />
+                          <span className="font-medium text-gray-800">{achieved}</span>
+                          <span className="mx-1 text-gray-400">•</span>
+                          <span className="text-gray-600">achieved</span>
+                        </div>
+                        
+                        <div className="hidden md:block h-4 w-px bg-gray-200"></div>
+                        
+                        <div className="flex items-center bg-blue-50 px-2.5 py-1 rounded-full whitespace-nowrap">
+                          <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 flex-shrink-0"></span>
+                          <span className="font-medium text-gray-800">{inProgress}</span>
+                          <span className="mx-1 text-gray-400">•</span>
+                          <span className="text-gray-600">in progress</span>
+                        </div>
+                        
+                        <div className="hidden md:block h-4 w-px bg-gray-200"></div>
+                        
+                        <Link
+                          to={`/outcomes/${objective.id}`}
+                          className="group flex items-center text-indigo-600 hover:text-indigo-800 transition-colors duration-150 whitespace-nowrap"
+                        >
+                          <span className="font-medium">View {total} outcomes</span>
+                          <svg 
+                            className="ml-1 h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" 
+                            fill="none" 
+                            viewBox="0 0 24 24" 
+                            stroke="currentColor"
+                          >
+                            <path 
+                              strokeLinecap="round" 
+                              strokeLinejoin="round" 
+                              strokeWidth={2} 
+                              d="M9 5l7 7-7 7" 
+                            />
+                          </svg>
+                        </Link>
                       </div>
                       
                       {(() => {
@@ -169,34 +202,26 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                         return null;
                       })()}
                       
-                      <div className="flex items-center text-sm text-gray-600">
-                        <span>{total} total outcomes</span>
+                      <div className="flex items-center justify-end">
+                        {/* Empty column for alignment */}
                       </div>
                     </div>
                     
                     {/* Progress bar */}
-                    <div className="mt-4">
-                      <div className="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Progress</span>
-                        <span>{progress}%</span>
+                    <div className="mt-5 pt-4 border-t border-gray-100">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-medium text-gray-700">Progress</span>
+                        <span className="text-sm font-medium text-gray-900">{progress}%</span>
                       </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                         <div 
-                          className="bg-indigo-600 h-2 rounded-full" 
+                          className="bg-gradient-to-r from-indigo-500 to-indigo-400 h-full rounded-full transition-all duration-500 ease-out"
                           style={{ width: `${progress}%` }}
                         />
                       </div>
                     </div>
                     
-                    {/* View outcomes link */}
-                    <div className="mt-4 flex justify-end">
-                      <Link
-                        to={`/outcomes?objective=${objective.id}`}
-                        className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"
-                      >
-                        View outcomes <span className="ml-1">→</span>
-                      </Link>
-                    </div>
+                    {/* Progress bar */}
                   </div>
                 </div>
               </div>

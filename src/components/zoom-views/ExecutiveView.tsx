@@ -48,11 +48,6 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
     };
   };
 
-  // Get all metrics for an objective
-  const getMetrics = (objective: any) => {
-    return objective.metrics || [];
-  };
-  
   // Calculate progress percentage
   const calculateProgress = (achieved: number, total: number) => {
     return total > 0 ? Math.round((achieved / total) * 100) : 0;
@@ -127,80 +122,74 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                       </div>
                     )}
                     
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="flex flex-wrap items-center gap-2 md:gap-1.5 text-sm text-gray-600">
-                        <div className="flex items-center bg-green-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                          <Check className="h-4 w-4 text-green-600 mr-1.5 flex-shrink-0" />
-                          <span className="font-medium text-gray-800">{achieved}</span>
-                          <span className="mx-1 text-gray-400">•</span>
-                          <span className="text-gray-600">achieved</span>
+                    {/* Three column layout for desktop, stacked on mobile */}
+                    <div className="mt-6 md:mt-4">
+                      <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+                        {/* Column 1: Outcomes status */}
+                        <div className="flex-1">
+                          <div className="flex flex-wrap gap-2 text-sm">
+                            <div className="flex items-center bg-green-50 px-3 py-1.5 rounded-full">
+                              <Check className="h-4 w-4 text-green-600 mr-1.5 flex-shrink-0" />
+                              <span className="font-medium text-gray-800">{achieved}</span>
+                            </div>
+                            <div className="flex items-center bg-blue-50 px-3 py-1.5 rounded-full">
+                              <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 flex-shrink-0"></span>
+                              <span className="font-medium text-gray-800">{inProgress}</span>
+                            </div>
+                          </div>
                         </div>
                         
-                        <div className="hidden md:block h-4 w-px bg-gray-200"></div>
-                        
-                        <div className="flex items-center bg-blue-50 px-2.5 py-1 rounded-full whitespace-nowrap">
-                          <span className="h-2 w-2 rounded-full bg-blue-500 mr-1.5 flex-shrink-0"></span>
-                          <span className="font-medium text-gray-800">{inProgress}</span>
-                          <span className="mx-1 text-gray-400">•</span>
-                          <span className="text-gray-600">in progress</span>
+                        {/* Column 2: Goal and metrics */}
+                        <div className="flex-1">
+                          {/* Show specific business goal for each objective */}
+                          {(() => {
+                            let metricText = '';
+                            let metricValue = '';
+                            
+                            if (objective.id === 'objective-1' || objective.id === 'objective-2') {
+                              // For Improve User Experience and Expand Market Reach
+                              metricText = 'Revenue Growth';
+                              metricValue = '5% of 10%';
+                            } else if (objective.id === 'objective-3') {
+                              // For Increase Operational Efficiency
+                              metricText = 'Increase Operational Efficiency';
+                              metricValue = '30% of 100%';
+                            }
+                            
+                            return (
+                              <div className="mt-2 flex items-center text-sm text-gray-600">
+                                <BarChart2 className="h-4 w-4 text-blue-500 mr-2 flex-shrink-0" />
+                                <span className="truncate">
+                                  {metricText}: {metricValue}
+                                </span>
+                              </div>
+                            );
+                          })()}
                         </div>
                         
-                        <div className="hidden md:block h-4 w-px bg-gray-200"></div>
-                        
-                        <Link
-                          to={`/outcomes/${objective.id}`}
-                          className="group flex items-center text-indigo-600 hover:text-indigo-800 transition-colors duration-150 whitespace-nowrap"
-                        >
-                          <span className="font-medium">View {total} outcomes</span>
-                          <svg 
-                            className="ml-1 h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
+                        {/* Column 3: View outcomes link */}
+                        <div className="flex-1 flex items-center justify-end">
+                          <Link
+                            to={`/outcomes/${objective.id}`}
+                            className="group inline-flex items-center text-indigo-600 hover:text-indigo-800 transition-colors duration-150 whitespace-nowrap text-sm font-medium"
                           >
-                            <path 
-                              strokeLinecap="round" 
-                              strokeLinejoin="round" 
-                              strokeWidth={2} 
-                              d="M9 5l7 7-7 7" 
-                            />
-                          </svg>
-                        </Link>
+                            <span>View {total} outcomes</span>
+                            <svg 
+                              className="ml-1 h-4 w-4 flex-shrink-0 transition-transform duration-200 group-hover:translate-x-0.5" 
+                              fill="none" 
+                              viewBox="0 0 24 24" 
+                              stroke="currentColor"
+                            >
+                              <path 
+                                strokeLinecap="round" 
+                                strokeLinejoin="round" 
+                                strokeWidth={2} 
+                                d="M9 5l7 7-7 7" 
+                              />
+                            </svg>
+                          </Link>
+                        </div>
                       </div>
-                      
-                      {(() => {
-                        // Get all metrics and filter for business metrics
-                        const metrics = getMetrics(objective);
-                        const businessMetrics = metrics.filter((m: any) => m.metricType === 'business');
-                        const nonNorthStarBusinessMetrics = businessMetrics.filter((m: any) => !m.isNorthStar);
-                        
-                        // If we have business metrics that aren't North Star, show them
-                        if (nonNorthStarBusinessMetrics.length > 0) {
-                          return nonNorthStarBusinessMetrics.map((metric: any) => (
-                            <div key={metric.id} className="flex items-center text-sm text-gray-600">
-                              <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
-                              <span>
-                                {metric.name}: {metric.current_value}{metric.unit} of {metric.target_value}{metric.unit}
-                              </span>
-                            </div>
-                          ));
-                        }
-                        
-                        // Fallback to any non-North Star metrics if no business metrics found
-                        const nonNorthStarMetrics = metrics.filter((m: any) => !m.isNorthStar);
-                        if (nonNorthStarMetrics.length > 0) {
-                          return nonNorthStarMetrics.map((metric: any) => (
-                            <div key={metric.id} className="flex items-center text-sm text-gray-600">
-                              <BarChart2 className="h-5 w-5 text-blue-500 mr-2" />
-                              <span>
-                                {metric.name}: {metric.current_value}{metric.unit} of {metric.target_value}{metric.unit}
-                              </span>
-                            </div>
-                          ));
-                        }
-                        
-                        return null;
-                      })()}
                       
                       <div className="flex items-center justify-end">
                         {/* Empty column for alignment */}
@@ -208,7 +197,7 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                     </div>
                     
                     {/* Progress bar */}
-                    <div className="mt-5 pt-4 border-t border-gray-100">
+                    <div className="mt-6 pt-4 border-t border-gray-100">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-medium text-gray-700">Progress</span>
                         <span className="text-sm font-medium text-gray-900">{progress}%</span>

@@ -17,7 +17,7 @@ interface ExecutiveViewProps {
 }
 
 const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
-  // Only show objectives in executive view
+  // Only show objectives in objectives view
   const objectives = items.filter(item => item.type === 'objective');
 
   // Get outcomes for each objective
@@ -78,6 +78,7 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
                   </div>
                   <div className="ml-5 flex-1">
                     <div className="flex justify-between">
+                      <h2 className="text-xl font-semibold mb-4">Company Objectives</h2>
                       <h3 className="text-xl font-semibold text-gray-900">{objective.title}</h3>
                       {team && (
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${team.color} bg-opacity-20 ${team.textColor}`}>

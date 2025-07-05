@@ -191,35 +191,13 @@ const TeamView: React.FC<TeamViewProps> = ({ items }) => {
     return betsFromItems;
   };
 
-  // Generate title based on context
-  const getTitle = () => {
-    if (betId && currentOutcome) {
-      return `Work: ${currentOutcome.title}`;
-    }
-    if (outcomeId && currentOutcome) {
-      return `Work: ${currentOutcome.title}`;
-    }
-    return 'Team View';
-  };
-  
-  // Generate description based on context
-  const getDescription = () => {
-    if (betId && currentOutcome) {
-      return `Viewing specific work items for ${currentOutcome.title}`;
-    }
-    if (outcomeId && currentOutcome) {
-      return `Viewing all work items for ${currentOutcome.title}`;
-    }
-    return 'Detailed view of all work items with execution details';
-  };
-  
   // Generate back link
   const getBackLink = () => {
     if (betId && currentOutcome) {
-      return `/team/outcome/${outcomeId}`;
+      return `/bets/outcome/${outcomeId}`;
     }
     if (outcomeId) {
-      return '/';
+      return '/bets';
     }
     return null;
   };
@@ -426,8 +404,8 @@ const TeamView: React.FC<TeamViewProps> = ({ items }) => {
   return (
     <BaseZoomView
       items={items}
-      title={getTitle()}
-      description={getDescription()}
+      title="Bets View"
+      description="Detailed breakdown of bets and their metrics"
     >
       <div className="space-y-6">
         {/* Back button when viewing specific items */}

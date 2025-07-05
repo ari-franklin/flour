@@ -17,21 +17,21 @@ export const useZoomLevel = () => {
     canZoomOut,
     
     // Helper methods
-    isExecutiveView: zoomLevel === 'executive',
-    isManagementView: zoomLevel === 'management',
-    isTeamView: zoomLevel === 'team',
+    isObjectivesView: zoomLevel === 'objectives',
+    isOutcomesView: zoomLevel === 'outcomes',
+    isBetsView: zoomLevel === 'bets',
     
     // Get the next zoom level (if available)
     getNextZoomLevel: () => {
-      const levels = ['executive', 'management', 'team'] as const;
-      const currentIndex = levels.indexOf(zoomLevel);
+      const levels = ['objectives', 'outcomes', 'bets'] as const;
+      const currentIndex = levels.indexOf(zoomLevel as any);
       return currentIndex < levels.length - 1 ? levels[currentIndex + 1] : null;
     },
     
     // Get the previous zoom level (if available)
     getPrevZoomLevel: () => {
-      const levels = ['executive', 'management', 'team'] as const;
-      const currentIndex = levels.indexOf(zoomLevel);
+      const levels = ['objectives', 'outcomes', 'bets'] as const;
+      const currentIndex = levels.indexOf(zoomLevel as any);
       return currentIndex > 0 ? levels[currentIndex - 1] : null;
     },
   };

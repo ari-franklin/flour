@@ -26,24 +26,7 @@ const getMetricTypeBadge = (metric: Metric) => {
     </span>
   );
   
-  const timeframeBadge = (
-    <span 
-      className={`${baseClasses} ${
-        metric.timeframe === 'leading' 
-          ? 'bg-green-100 text-green-800' 
-          : 'bg-orange-100 text-orange-800'
-      }`}
-    >
-      {metric.timeframe === 'leading' ? 'Leading' : 'Lagging'}
-    </span>
-  );
-  
-  return (
-    <>
-      {typeBadge}
-      {timeframeBadge}
-    </>
-  );
+  return typeBadge;
 };
 
 interface MetricTreeViewProps {
@@ -159,7 +142,7 @@ const MetricTreeView: React.FC<MetricTreeViewProps> = ({
               Type: <span className="font-medium capitalize">{metric.metricType} metric</span>
             </p>
             <p className="text-sm text-gray-600">
-              Timeframe: <span className="font-medium capitalize">{metric.timeframe} indicator</span>
+              Leading indicator
             </p>
             <p className="text-sm text-gray-600">
               Current Value: <span className="font-medium">{progress} {metric.unit || ''}</span>

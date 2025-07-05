@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useZoom, ZoomLevel } from '../contexts/ZoomContext';
 import { ZoomIn, ZoomOut, LayoutDashboard, Users, Target, Maximize2, BarChart2 } from 'lucide-react';
 
@@ -11,23 +11,23 @@ type ZoomLevelConfig = {
 };
 
 const zoomLevelConfigs: Record<ZoomLevel, ZoomLevelConfig> = {
-  executive: {
-    label: 'Executive',
+  objectives: {
+    label: 'Objectives',
     icon: <LayoutDashboard className="h-4 w-4" />,
     description: 'High-level objectives',
-    path: '/'
+    path: '/objectives'
   },
-  management: {
-    label: 'Management',
+  outcomes: {
+    label: 'Outcomes',
     icon: <Target className="h-4 w-4" />,
-    description: 'Team objectives & outcomes',
-    path: '/management'
+    description: 'Key results & outcomes',
+    path: '/outcomes'
   },
-  team: {
-    label: 'Team',
+  bets: {
+    label: 'Bets',
     icon: <Users className="h-4 w-4" />,
-    description: 'Detailed tasks & bets',
-    path: '/team'
+    description: 'Initiatives & bets',
+    path: '/bets'
   },
   metrics: {
     label: 'Metrics',
@@ -142,7 +142,7 @@ const ZoomControls: React.FC = () => {
       </button>
 
       <button
-        onClick={() => setZoomLevel('executive')}
+        onClick={() => setZoomLevel('objectives')}
         className="p-1.5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 rounded-md"
         aria-label="Reset zoom"
       >

@@ -20,23 +20,23 @@ const AppContent: React.FC = () => {
   
   const isPublicView = location.pathname === '/public';
   const isMetricsView = location.pathname === '/metrics';
-  const isManagementView = location.pathname === '/management';
-  const isTeamView = location.pathname === '/team';
+  const isOutcomesView = location.pathname === '/outcomes';
+  const isBetsView = location.pathname === '/bets';
 
   // Update zoom level when route changes
   React.useEffect(() => {
     if (isMetricsView && zoomLevel !== 'metrics') {
       setZoomLevel('metrics');
-    } else if (isPublicView && zoomLevel !== 'executive') {
-      setZoomLevel('executive');
-    } else if (isManagementView && zoomLevel !== 'management') {
-      setZoomLevel('management');
-    } else if (isTeamView && zoomLevel !== 'team') {
-      setZoomLevel('team');
-    } else if (!isPublicView && !isMetricsView && !isManagementView && !isTeamView && zoomLevel !== 'executive') {
-      setZoomLevel('executive');
+    } else if (isPublicView && zoomLevel !== 'objectives') {
+      setZoomLevel('objectives');
+    } else if (isOutcomesView && zoomLevel !== 'outcomes') {
+      setZoomLevel('outcomes');
+    } else if (isBetsView && zoomLevel !== 'bets') {
+      setZoomLevel('bets');
+    } else if (!isPublicView && !isMetricsView && !isOutcomesView && !isBetsView && zoomLevel !== 'objectives') {
+      setZoomLevel('objectives');
     }
-  }, [isMetricsView, isPublicView, isManagementView, isTeamView, location.pathname, zoomLevel, setZoomLevel]);
+  }, [isMetricsView, isPublicView, isOutcomesView, isBetsView, location.pathname, zoomLevel, setZoomLevel]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,17 +81,16 @@ const AppContent: React.FC = () => {
               </div>
             </div>
           } />
-          <Route path="/management" element={<ExampleRoadmap zoomLevel="management" />} />
-          <Route path="/team" element={<ExampleRoadmap zoomLevel="team" />}>
-            <Route path="outcome/:outcomeId" element={<ExampleRoadmap zoomLevel="team" />}>
-              <Route path="bet/:betId" element={<ExampleRoadmap zoomLevel="team" />} />
+          <Route path="/outcomes" element={<ExampleRoadmap zoomLevel="outcomes" />}>
+            <Route path=":objectiveId" element={<ExampleRoadmap zoomLevel="outcomes" />} />
+          </Route>
+          <Route path="/bets" element={<ExampleRoadmap zoomLevel="bets" />}>
+            <Route path="outcome/:outcomeId" element={<ExampleRoadmap zoomLevel="bets" />}>
+              <Route path="bet/:betId" element={<ExampleRoadmap zoomLevel="bets" />} />
             </Route>
           </Route>
-          <Route path="/outcomes" element={<ExampleRoadmap zoomLevel="management" />}>
-            <Route path=":objectiveId" element={<ExampleRoadmap zoomLevel="management" />} />
-          </Route>
-          <Route path="/public" element={<ExampleRoadmap zoomLevel="executive" isPublicView />} />
-          <Route path="/" element={<ExampleRoadmap zoomLevel="executive" />} />
+          <Route path="/public" element={<ExampleRoadmap zoomLevel="objectives" isPublicView />} />
+          <Route path="/" element={<ExampleRoadmap zoomLevel="objectives" />} />
         </Routes>
         <Toaster position="bottom-right" />
       </main>

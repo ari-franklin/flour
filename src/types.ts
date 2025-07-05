@@ -1,4 +1,4 @@
-export type MetricLevel = 'executive' | 'management' | 'team';
+export type MetricLevel = 'objectives' | 'outcomes' | 'bets';
 export type ParentType = 'objective' | 'outcome' | 'bet';
 
 export interface Team {
@@ -13,7 +13,6 @@ export interface Objective {
   id: string;
   title: string;
   description?: string;
-  executive_summary?: string;
   team_id: string;
   is_public: boolean;
   created_at?: string;
@@ -25,7 +24,6 @@ export interface Outcome {
   id: string;
   title: string;
   description?: string;
-  management_summary?: string;
   objective_id?: string;
   team_id: string;
   status: 'now' | 'near' | 'next';
@@ -40,7 +38,6 @@ export interface Bet {
   id: string;
   title: string;
   description?: string;
-  team_summary?: string;
   outcome_id: string;
   team_id: string;
   status: 'now' | 'near' | 'next';
@@ -67,7 +64,6 @@ export interface Metric {
   team?: Pick<Team, 'id' | 'name' | 'color'>;
   // Metric classification
   metricType: 'business' | 'product';
-  timeframe: 'leading' | 'lagging';
   // New fields for metric relationships
   child_metrics?: string[]; // IDs of child metrics that roll up to this one
   parent_metric_id?: string; // ID of parent metric this rolls up to
@@ -97,7 +93,7 @@ export interface SuccessMetric {
 }
 
 // Types for the fractal view
-export type ViewLevel = 'executive' | 'management' | 'team' | 'roadmap';
+export type ViewLevel = 'objectives' | 'outcomes' | 'bets' | 'roadmap';
 export type RoadmapItemType = 'objective' | 'outcome' | 'bet';
 
 export interface RoadmapItem {
@@ -114,9 +110,6 @@ export interface RoadmapItem {
   // Additional type-specific fields
   objective_id?: string;
   outcome_id?: string;
-  executive_summary?: string;
-  management_summary?: string;
-  team_summary?: string;
 }
 
 export interface ViewConfig {

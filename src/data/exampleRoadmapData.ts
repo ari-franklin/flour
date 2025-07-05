@@ -32,21 +32,17 @@ const createMetric = (
     unit?: string;
     description?: string;
     metricType?: 'business' | 'product';
-    timeframe?: 'leading' | 'lagging';
     isNorthStar?: boolean;
   } = {}
 ): Omit<Metric, 'team'> & { team?: Team } => {
   const level: MetricLevel = 
-    parentType === 'objective' ? 'executive' : 
-    parentType === 'outcome' ? 'management' : 'team';
+    parentType === 'objective' ? 'objectives' : 
+    parentType === 'outcome' ? 'outcomes' : 'bets';
     
   // Determine if this is a business metric (only Revenue Growth for now)
   const isBusinessMetric = name.toLowerCase().includes('revenue') || 
                          name.toLowerCase().includes('growth') ||
                          options.metricType === 'business';
-  
-  // Default to lagging for business metrics, leading for others
-  const defaultTimeframe = isBusinessMetric ? 'lagging' : 'leading';
   
   return {
     id,
@@ -60,7 +56,6 @@ const createMetric = (
     parent_id: parentId,
     team_id: teamId,
     metricType: options.metricType || (isBusinessMetric ? 'business' : 'product'),
-    timeframe: options.timeframe || defaultTimeframe,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     team: exampleTeams.find(t => t.id === teamId),
@@ -74,7 +69,6 @@ export const exampleBets: Bet[] = [
     id: 'bet-1',
     title: 'Implement interactive product tour',
     description: 'Create a step-by-step interactive guide for new users',
-    team_summary: 'Engineering and Design collaboration required',
     outcome_id: 'outcome-1',
     team_id: 'team-2',
     status: 'now',
@@ -86,7 +80,6 @@ export const exampleBets: Bet[] = [
     id: 'bet-2',
     title: 'Redesign welcome email sequence',
     description: 'Improve email engagement with personalized content',
-    team_summary: 'Marketing lead with Product support',
     outcome_id: 'outcome-1',
     team_id: 'team-4',
     status: 'next',
@@ -99,7 +92,6 @@ export const exampleBets: Bet[] = [
     id: 'bet-3',
     title: 'Optimize database queries',
     description: 'Identify and optimize slow database queries',
-    team_summary: 'Backend engineering focus',
     outcome_id: 'outcome-2',
     team_id: 'team-2',
     status: 'now',
@@ -112,7 +104,6 @@ export const exampleBets: Bet[] = [
     id: 'bet-4',
     title: 'Localize product for European markets',
     description: 'Translate UI and content for EMEA region',
-    team_summary: 'Localization and internationalization effort',
     outcome_id: 'outcome-3',
     team_id: 'team-1',
     status: 'next',
@@ -128,7 +119,6 @@ export const exampleOutcomes: Outcome[] = [
     id: 'outcome-1',
     title: 'Enhance User Onboarding',
     description: 'Improve new user activation and retention',
-    management_summary: 'Focusing on first-time user experience and engagement',
     objective_id: 'objective-1',
     team_id: 'team-1',
     status: 'now',
@@ -140,7 +130,6 @@ export const exampleOutcomes: Outcome[] = [
     id: 'outcome-2',
     title: 'Improve Core Performance',
     description: 'Enhance application speed and reliability',
-    management_summary: 'Technical improvements for better user experience',
     objective_id: 'objective-1',
     team_id: 'team-2',
     status: 'now',
@@ -153,7 +142,6 @@ export const exampleOutcomes: Outcome[] = [
     id: 'outcome-3',
     title: 'Launch in EMEA Region',
     description: 'Expand product availability to European markets',
-    management_summary: 'International expansion to EMEA region',
     objective_id: 'objective-2',
     team_id: 'team-1',
     status: 'next',
@@ -166,10 +154,9 @@ export const exampleOutcomes: Outcome[] = [
     id: 'outcome-4',
     title: 'Implement CI/CD Pipeline',
     description: 'Automate build, test, and deployment processes',
-    management_summary: 'Streamline development workflow',
     objective_id: 'objective-3',
     team_id: 'team-2',
-    status: 'next', // Changed from 'later' to 'next' to match valid status values
+    status: 'next',
     is_public: false,
     created_at: '2025-05-25T00:00:00Z',
     updated_at: '2025-06-28T00:00:00Z',
@@ -181,7 +168,6 @@ export const exampleObjectives: Objective[] = [
     id: 'objective-1',
     title: 'Improve User Experience',
     description: 'Deliver a seamless and intuitive product experience',
-    executive_summary: 'Enhancing overall user satisfaction and engagement',
     team_id: 'team-1',
     is_public: true,
     created_at: '2025-05-01T00:00:00Z',
@@ -191,7 +177,6 @@ export const exampleObjectives: Objective[] = [
     id: 'objective-2',
     title: 'Expand Market Reach',
     description: 'Grow our presence in international markets',
-    executive_summary: 'Strategic expansion to new geographical markets',
     team_id: 'team-1',
     is_public: true,
     created_at: '2025-05-05T00:00:00Z',
@@ -201,7 +186,6 @@ export const exampleObjectives: Objective[] = [
     id: 'objective-3',
     title: 'Increase Operational Efficiency',
     description: 'Streamline internal processes and reduce costs',
-    executive_summary: 'Improving development velocity and reducing overhead',
     team_id: 'team-2',
     is_public: false, // Internal objective
     created_at: '2025-05-10T00:00:00Z',
@@ -211,14 +195,13 @@ export const exampleObjectives: Objective[] = [
 
 // Generate metrics for all items with hierarchical relationships
 const allMetrics = [
-  // ===== Company-Wide Metrics =====
+  // Company-wide business metric with child metrics
   createMetric('m-company-1', 'Revenue Growth', '5', '10', 'company', 'objective', 'team-1', {
     child_metrics: ['m-exec-1', 'm-exec-2'],
     formula: 'weighted_average',
     unit: '%',
     description: 'Year-over-year revenue growth target',
-    metricType: 'business',
-    timeframe: 'lagging'
+    metricType: 'business'
   }),
   
   // ===== Objective 1: Improve User Experience =====

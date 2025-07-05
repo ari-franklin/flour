@@ -10,7 +10,7 @@ interface ManagementViewProps {
 }
 
 const ManagementView: React.FC<ManagementViewProps> = ({ items, expandedObjectives, onToggleObjective }) => {
-  // Filter for management-level items (objectives, outcomes, and bets)
+  // Filter for outcomes-level items (objectives, outcomes, and bets)
   const objectives = items.filter(item => item.type === 'objective');
   const outcomes = items.filter(item => item.type === 'outcome');
   const bets = items.filter(item => item.type === 'bet');
@@ -32,7 +32,7 @@ const ManagementView: React.FC<ManagementViewProps> = ({ items, expandedObjectiv
   return (
     <BaseZoomView
       items={items}
-      title="Management View"
+      title="Outcomes View"
       description="Objectives with their key outcomes and progress"
     >
       <div className="space-y-4">

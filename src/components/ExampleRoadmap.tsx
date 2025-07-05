@@ -24,8 +24,8 @@ export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => 
     if (objectiveId) {
       setExpandedObjectives(new Set([objectiveId]));
       
-      // If we're not already in management view, navigate to it
-      if (zoomLevel !== 'management') {
+      // If we're not already in outcomes view, scroll to the objective
+      if (zoomLevel !== 'outcomes') {
         // Use a small timeout to ensure the view has updated before scrolling
         const timer = setTimeout(() => {
           const element = document.getElementById(`objective-${objectiveId}`);
@@ -40,8 +40,8 @@ export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => 
         }, 100);
         return () => clearTimeout(timer);
       }
-    } else if (location.pathname === '/outcomes' && expandedObjectives.size > 0) {
-      // Clear expanded objectives when navigating back to the main outcomes page
+    } else if ((location.pathname === '/outcomes' || location.pathname === '/bets') && expandedObjectives.size > 0) {
+      // Clear expanded objectives when navigating back to the main views
       setExpandedObjectives(new Set());
     }
   }, [objectiveId, location.pathname, zoomLevel]);
@@ -72,9 +72,9 @@ export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => 
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">
-            {zoomLevel === 'executive' && 'Executive View'}
-            {zoomLevel === 'management' && 'Management View'}
-            {zoomLevel === 'team' && 'Team View'}
+            {zoomLevel === 'objectives' && 'Objectives View'}
+            {zoomLevel === 'outcomes' && 'Outcomes View'}
+            {zoomLevel === 'bets' && 'Bets View'}
           </h1>
           <Link 
             to="/metrics"
@@ -84,8 +84,8 @@ export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => 
           </Link>
         </div>
         
-        {zoomLevel === 'executive' && <ExecutiveView items={roadmapItems} />}
-        {zoomLevel === 'management' && (
+        {zoomLevel === 'objectives' && <ExecutiveView items={roadmapItems} />}
+        {zoomLevel === 'outcomes' && (
           <ManagementView 
             items={roadmapItems} 
             expandedObjectives={expandedObjectives}
@@ -100,7 +100,7 @@ export const ExampleRoadmap: React.FC<ExampleRoadmapProps> = ({ zoomLevel }) => 
             }}
           />
         )}
-        {zoomLevel === 'team' && <TeamView items={roadmapItems} />}
+        {zoomLevel === 'bets' && <TeamView items={roadmapItems} />}
       </div>
     );
   };

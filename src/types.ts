@@ -64,7 +64,6 @@ export interface Metric {
   team?: Pick<Team, 'id' | 'name' | 'color'>;
   // Metric classification
   metricType: 'business' | 'product';
-  timeframe: 'leading' | 'lagging';
   // New fields for metric relationships
   child_metrics?: string[]; // IDs of child metrics that roll up to this one
   parent_metric_id?: string; // ID of parent metric this rolls up to

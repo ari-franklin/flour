@@ -32,7 +32,6 @@ const createMetric = (
     unit?: string;
     description?: string;
     metricType?: 'business' | 'product';
-    timeframe?: 'leading' | 'lagging';
     isNorthStar?: boolean;
   } = {}
 ): Omit<Metric, 'team'> & { team?: Team } => {
@@ -44,9 +43,6 @@ const createMetric = (
   const isBusinessMetric = name.toLowerCase().includes('revenue') || 
                          name.toLowerCase().includes('growth') ||
                          options.metricType === 'business';
-  
-  // Default to lagging for business metrics, leading for others
-  const defaultTimeframe = isBusinessMetric ? 'lagging' : 'leading';
   
   return {
     id,
@@ -60,7 +56,6 @@ const createMetric = (
     parent_id: parentId,
     team_id: teamId,
     metricType: options.metricType || (isBusinessMetric ? 'business' : 'product'),
-    timeframe: options.timeframe || defaultTimeframe,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
     team: exampleTeams.find(t => t.id === teamId),
@@ -200,14 +195,13 @@ export const exampleObjectives: Objective[] = [
 
 // Generate metrics for all items with hierarchical relationships
 const allMetrics = [
-  // ===== Company-Wide Metrics =====
+  // Company-wide business metric with child metrics
   createMetric('m-company-1', 'Revenue Growth', '5', '10', 'company', 'objective', 'team-1', {
     child_metrics: ['m-exec-1', 'm-exec-2'],
     formula: 'weighted_average',
     unit: '%',
     description: 'Year-over-year revenue growth target',
-    metricType: 'business',
-    timeframe: 'lagging'
+    metricType: 'business'
   }),
   
   // ===== Objective 1: Improve User Experience =====

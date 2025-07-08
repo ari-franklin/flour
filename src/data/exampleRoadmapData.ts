@@ -33,6 +33,7 @@ const createMetric = (
     description?: string;
     metricType?: 'business' | 'product';
     isNorthStar?: boolean;
+    status?: 'todo' | 'in_progress' | 'done';
   } = {}
 ): Omit<Metric, 'team'> & { team?: Team } => {
   const level: MetricLevel = 
@@ -195,12 +196,20 @@ export const exampleObjectives: Objective[] = [
 
 // Generate metrics for all items with hierarchical relationships
 const allMetrics = [
-  // Company-wide business metric with child metrics
+  // Company-wide business metrics
   createMetric('m-company-1', 'Revenue Growth', '5', '10', 'company', 'objective', 'team-1', {
     child_metrics: ['m-exec-1', 'm-exec-2'],
     formula: 'weighted_average',
     unit: '%',
     description: 'Year-over-year revenue growth target',
+    metricType: 'business'
+  }),
+  
+  createMetric('m-company-2', 'Gross Margin', '45', '50', 'company', 'objective', 'team-3', {
+    child_metrics: ['m-exec-3'],
+    formula: 'weighted_average',
+    unit: '%',
+    description: 'Gross margin percentage target',
     metricType: 'business'
   }),
   
@@ -255,10 +264,13 @@ const allMetrics = [
   }),
   
   // ===== Objective 3: Increase Operational Efficiency =====
-  createMetric('m-exec-3', 'Operational Efficiency', '50', '90', 'objective-3', 'objective', 'team-2', {
+  createMetric('m-exec-3', 'Operational Efficiency', '50', '90', 'objective-3', 'objective', 'team-3', {
     child_metrics: ['m-mgmt-4'],
+    parent_metric_id: 'm-company-2',
+    contribution_type: 'weighted',
+    weight: 30,
     unit: '%',
-    description: 'Overall operational efficiency score'
+    description: 'Operational efficiency improvements contribution to margin'
   }),
   
   // Outcome 4: Implement CI/CD Pipeline
@@ -266,6 +278,7 @@ const allMetrics = [
     parent_metric_id: 'm-exec-3',
     contribution_type: 'direct',
     unit: '%',
+    status: 'in_progress',
     description: 'Progress on CI/CD pipeline implementation'
   }),
   
@@ -276,10 +289,12 @@ const allMetrics = [
     contribution_type: 'weighted',
     weight: 50,
     unit: '%',
+    status: 'in_progress',
     description: 'Percentage of new users who complete the product tour'
   }),
   
-  createMetric('m-team-2', 'Feature Adoption', '35', '60', 'bet-1', 'bet', 'team-1', {
+  createMetric('m-b2-1', 'Feature Adoption', '45', '80', 'bet-2', 'bet', 'team-1', {
+    status: 'todo',
     parent_metric_id: 'm-mgmt-1',
     contribution_type: 'weighted',
     weight: 50,
@@ -288,16 +303,18 @@ const allMetrics = [
   }),
   
   // Bet 2: Redesign welcome email sequence
-  createMetric('m-b2-1', 'Email Engagement', '25', '50', 'bet-2', 'bet', 'team-4', {
+  createMetric('m-team-2', 'Email Engagement', '25', '50', 'bet-2', 'bet', 'team-4', {
     parent_metric_id: 'm-mgmt-1',
     contribution_type: 'weighted',
     weight: 30,
     unit: '%',
+    status: 'todo',
     description: 'Open and click-through rates for welcome emails'
   }),
   
   // Bet 3: Optimize database queries
-  createMetric('m-team-3', 'Query Performance', '80', '95', 'bet-3', 'bet', 'team-2', {
+  createMetric('m-team-2', 'Time to First Value', '12', '5', 'bet-2', 'bet', 'team-1', {
+    status: 'in_progress',
     parent_metric_id: 'm-mgmt-2',
     contribution_type: 'weighted',
     weight: 40,
@@ -305,7 +322,8 @@ const allMetrics = [
     description: 'Performance score of optimized queries'
   }),
   
-  createMetric('m-team-4', 'System Uptime', '99.5', '99.95', 'bet-3', 'bet', 'team-2', {
+  createMetric('m-team-3', 'System Uptime', '99.5', '99.95', 'bet-3', 'bet', 'team-2', {
+    status: 'blocked',
     parent_metric_id: 'm-mgmt-2',
     contribution_type: 'weighted',
     weight: 30,
@@ -313,7 +331,8 @@ const allMetrics = [
     description: 'System availability percentage'
   }),
   
-  createMetric('m-b3-1', 'Query Response Time', '350', '200', 'bet-3', 'bet', 'team-2', {
+  createMetric('m-b3-1', 'API Response Time', '350', '200', 'bet-3', 'bet', 'team-2', {
+    status: 'blocked',
     parent_metric_id: 'm-mgmt-2',
     contribution_type: 'weighted',
     weight: 30,
@@ -321,12 +340,22 @@ const allMetrics = [
     description: 'Average response time for database queries'
   }),
   
+  createMetric('m-b3-1', 'Error Rate', '2.5', '0.5', 'bet-3', 'bet', 'team-2', {
+    status: 'done',
+    parent_metric_id: 'm-mgmt-2',
+    contribution_type: 'weighted',
+    weight: 30,
+    unit: '%',
+    description: 'Percentage of requests resulting in errors'
+  }),
+  
   // Bet 4: Localize product for European markets
   createMetric('m-b4-1', 'Localization Coverage', '0', '95', 'bet-4', 'bet', 'team-1', {
     parent_metric_id: 'm-mgmt-3',
     contribution_type: 'direct',
     unit: '%',
-    description: 'Percentage of UI and content localized for target markets'
+    status: 'todo',
+    description: 'Percentage of product content localized for target markets'
   })
 ] as const;
 

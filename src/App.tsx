@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { ZoomProvider, useZoom } from './contexts/ZoomContext';
 import { Toaster } from 'react-hot-toast';
 import { ExampleRoadmap } from './components/ExampleRoadmap';
+import { getConnectedData } from './data/exampleRoadmapData';
+import OutcomeView from './components/zoom-views/OutcomeView';
 
 const App: React.FC = () => {
   return (
@@ -82,7 +84,9 @@ const AppContent: React.FC = () => {
             </div>
           } />
           <Route path="/outcomes" element={<ExampleRoadmap zoomLevel="outcomes" />}>
-            <Route path=":objectiveId" element={<ExampleRoadmap zoomLevel="outcomes" />} />
+            <Route path=":objectiveId" element={<ExampleRoadmap zoomLevel="outcomes" />}>
+              <Route path="outcome/:outcomeId" element={<OutcomeView />} />
+            </Route>
           </Route>
           <Route path="/bets" element={<ExampleRoadmap zoomLevel="bets" />}>
             <Route path="outcome/:outcomeId" element={<ExampleRoadmap zoomLevel="bets" />}>

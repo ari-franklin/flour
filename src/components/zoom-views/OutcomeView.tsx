@@ -37,11 +37,22 @@ const OutcomeView: React.FC = () => {
     );
   }
 
-  // Get metrics for this outcome that don't have children
-  // Get metrics for this outcome that don't have children and have a status
-  const outcomeMetrics = (currentOutcome.metrics || []).filter(
-    (metric) => !metric.child_metrics?.length && metric.status
-  );
+  // Get all metrics for this outcome (both direct and from its bets)
+  const getOutcomeMetrics = (outcomeId: string) => {
+    const directMetrics = currentOutcome.metrics || [];
+    const betMetrics = (roadmapItems || [])
+      .filter((item: any) => item.type === 'bet' && item.outcome_id === outcomeId)
+      .flatMap((bet: any) => bet.metrics || []);
+    
+    // Combine and deduplicate metrics by ID
+    const allMetrics = [...directMetrics, ...betMetrics];
+    return allMetrics.filter((metric, index, self) => 
+      index === self.findIndex(m => m.id === metric.id)
+    );
+  };
+
+  // Get metrics for this outcome
+  const outcomeMetrics = getOutcomeMetrics(currentOutcome.id);
 
   return (
     <BaseZoomView 

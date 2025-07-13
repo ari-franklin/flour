@@ -70,6 +70,7 @@ export interface Metric {
   contribution_type?: 'direct' | 'weighted' | 'formula';
   weight?: number; // For weighted contributions
   formula?: string; // For formula-based contributions
+  status?:  'todo' | 'in_progress' | 'done';
   // Flags
   isNorthStar?: boolean; // Whether this is a North Star metric
 }

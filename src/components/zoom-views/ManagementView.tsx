@@ -1,7 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { RoadmapItem } from '../../types';
 import BaseZoomView from './BaseZoomView';
-import { Target, ChevronDown, ChevronRight, Users, BarChart2, TrendingUp, Target as TargetIcon, Gauge } from 'lucide-react';
+import { Target, ChevronDown, ChevronRight, Users, BarChart2, TrendingUp, Target as TargetIcon, Gauge, ArrowUpRight } from 'lucide-react';
 
 interface ManagementViewProps {
   items: RoadmapItem[];
@@ -75,11 +76,21 @@ const ManagementView: React.FC<ManagementViewProps> = ({ items, expandedObjectiv
                   </h4>
                   <div className="space-y-3">
                     {objectiveOutcomes.map((outcome) => (
-                      <div key={outcome.id} className="bg-white p-4 rounded-md border border-gray-100 shadow-sm">
-                        <h5 className="font-medium text-gray-900">{outcome.title}</h5>
-                        {outcome.description && (
-                          <p className="mt-1 text-sm text-gray-600">{outcome.description}</p>
-                        )}
+                      <Link 
+                        key={outcome.id} 
+                        to={`/outcomes/${objective.id}/outcome/${outcome.id}`}
+                        className="block bg-white p-4 rounded-md border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h3 className="font-medium text-gray-900">{outcome.title}</h3>
+                            {outcome.description && (
+                              <p className="text-sm text-gray-500 mt-1">{outcome.description}</p>
+                            )}
+                          </div>
+                          <ArrowUpRight className="h-4 w-4 text-gray-400" />
+                        </div>
                         <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
                           <span className="flex items-center">
                             <Users className="h-3.5 w-3.5 mr-1" />
@@ -112,7 +123,26 @@ const ManagementView: React.FC<ManagementViewProps> = ({ items, expandedObjectiv
                                           <Gauge className="h-2.5 w-2.5 text-indigo-600" />
                                         )}
                                       </div>
-                                      <span className="font-medium text-gray-700">{metric.name}</span>
+                                      <div className="flex items-center">
+                                        <span className="font-medium text-gray-700">{metric.name}</span>
+                                        {metric.status && (() => {
+                                          const statusMap = {
+                                            done: { label: 'Done', className: 'bg-green-100 text-green-800' },
+                                            in_progress: { label: 'In Progress', className: 'bg-blue-100 text-blue-800' },
+                                            todo: { label: 'To Do', className: 'bg-gray-100 text-gray-800' },
+                                            blocked: { label: 'Blocked', className: 'bg-red-100 text-red-800' }
+                                          };
+                                          
+                                          const status = statusMap[metric.status as keyof typeof statusMap] || 
+                                                       { label: 'To Do', className: 'bg-gray-100 text-gray-800' };
+                                          
+                                          return (
+                                            <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs font-medium ${status.className}`}>
+                                              {status.label}
+                                            </span>
+                                          );
+                                        })()}
+                                      </div>
                                     </div>
                                     <div className="flex items-center">
                                       <span className={`font-medium ${(metric.current_value || 0) >= (metric.target_value || 0) ? 'text-green-600' : 'text-amber-600'}`}>
@@ -127,7 +157,7 @@ const ManagementView: React.FC<ManagementViewProps> = ({ items, expandedObjectiv
                             </div>
                           ) : null;
                         })()}
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>

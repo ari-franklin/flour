@@ -1,74 +1,23 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { RoadmapItem } from '../../types';
 import BaseZoomView from './BaseZoomView';
-import { Target, BarChart2, TrendingUp, Check, Plus } from 'lucide-react';
+import { Target, BarChart2, TrendingUp, Check, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { SlideInPanel } from '../ui/SlideInPanel';
-import { ObjectiveForm } from '../forms/ObjectiveForm';
-// Import will be used when we implement the actual save functionality
 
 interface ExecutiveViewProps {
   items: RoadmapItem[];
 }
 
 const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
-  const [isPanelOpen, setIsPanelOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewData, setPreviewData] = useState<{
-    name: string;
-    target: string;
-    direction: 'increase' | 'decrease';
-  }>({ name: '', target: '', direction: 'increase' });
-
-  const handleSubmit = async (formData: { 
-    name: string; 
-    target: string; 
-    direction: 'increase' | 'decrease';
-    outcome_id?: string;
-  }) => {
-    console.log('Form submitted:', formData);
-    // Update preview data
-    setPreviewData({
-      name: formData.name,
-      target: formData.target,
-      direction: formData.direction
-    });
-    
-    // In a real app, you would save the data to your backend here
-    // For now, we'll just log it and close the panel after a delay
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      console.log('Objective would be saved here:', formData);
-      setIsSubmitting(false);
-      setIsPanelOpen(false);
-      
-      // Show success message
-      alert(`Objective "${formData.name}" created successfully${formData.outcome_id ? ' and linked to outcome' : ''}!`);
-    }, 1000);
-  };
-
-  // Get L1 outcomes for the dropdown (main objectives in Executive View)
-  const outcomes = [
-    {
-      id: 'objective-1',
-      title: 'Improve User Experience',
-      team_id: 'team-1'
-    },
-    {
-      id: 'objective-2',
-      title: 'Expand Market Reach',
-      team_id: 'team-1'
-    },
-    {
-      id: 'objective-3',
-      title: 'Increase Operational Efficiency',
-      team_id: 'team-2'
-    }
-  ];
+  console.log('ExecutiveView received items:', JSON.parse(JSON.stringify(items)));
+  
   // Only show objectives in objectives view
   const objectives = items.filter(item => item.type === 'objective');
+  console.log('Filtered objectives:', JSON.parse(JSON.stringify(objectives)));
+  
+  if (objectives.length === 0) {
+    console.warn('No objectives found in ExecutiveView. Items array:', JSON.parse(JSON.stringify(items)));
+  }
 
   // Get outcomes for each objective
   const getOutcomes = (objectiveId: string) => {
@@ -99,30 +48,36 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
   };
 
   return (
-    <div className="relative">
-      <BaseZoomView
-        items={objectives}
-        title="Executive View"
-        description="High-level strategic objectives and key results"
-      >
-        <div className="space-y-6">
-          {objectives.map((objective) => {
-            const outcomes = getOutcomes(objective.id);
-            const { total, achieved, inProgress } = countOutcomesByStatus(outcomes);
+    <BaseZoomView
+      items={objectives}
+      title="Executive View"
+      description="High-level strategic objectives and key results"
+    >
+      <div className="space-y-6">
+        {objectives.map((objective) => {
+          const outcomes = getOutcomes(objective.id);
+          const { total, achieved, inProgress } = countOutcomesByStatus(outcomes);
 
-            return (
-              <div 
-                key={objective.id}
-                className="bg-white overflow-hidden shadow rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200"
-              >
+          return (
+            <div 
+              key={objective.id}
+              className="bg-white overflow-hidden shadow rounded-lg border border-gray-200 hover:shadow-md transition-shadow duration-200"
+            >
               <div className="p-6">
                 <div className="flex items-start">
                   <div className="flex-shrink-0 bg-indigo-100 p-3 rounded-lg">
                     <Target className="h-6 w-6 text-indigo-600" />
                   </div>
                   <div className="ml-5 flex-1">
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-start">
                       <h2 className="text-xl font-semibold mb-4">{objective.title}</h2>
+                      <Link 
+                        to={`/outcomes/${objective.id}`}
+                        className="ml-4 p-1 text-gray-400 hover:text-indigo-600 rounded-full hover:bg-indigo-50 transition-colors duration-200"
+                        title="View outcomes"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </Link>
                     </div>
                     
                     {objective.description && (
@@ -273,50 +228,9 @@ const ExecutiveView: React.FC<ExecutiveViewProps> = ({ items }) => {
               </div>
             </div>
           );
-          })}
-        </div>
-      </BaseZoomView>
-
-      {/* Floating Action Button */}
-      <button
-        onClick={() => setIsPanelOpen(true)}
-        className="fixed bottom-8 right-8 bg-indigo-600 text-white p-4 rounded-full shadow-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-        aria-label="Add new objective"
-      >
-        <Plus className="h-6 w-6" />
-      </button>
-
-      {/* Slide-in Panel */}
-      <SlideInPanel 
-        isOpen={isPanelOpen} 
-        onClose={() => setIsPanelOpen(false)}
-        title="New Business Objective"
-      >
-        <div className="h-full flex flex-col">
-          <div className="flex-1">
-            <ObjectiveForm 
-              onSubmit={handleSubmit} 
-              isLoading={isSubmitting}
-              outcomes={outcomes}
-            />
-          </div>
-          
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="text-sm text-gray-500">
-              <p className="font-medium">Preview:</p>
-              <div className="mt-2 p-3 bg-gray-50 rounded-md">
-                <p className="font-medium">
-                  {isSubmitting ? 'Saving...' : 
-                    previewData.name && previewData.target 
-                      ? `[${previewData.direction === 'increase' ? '↑' : '↓'}] ${previewData.name} ${previewData.target}`
-                      : 'Enter objective details to see preview'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </SlideInPanel>
-    </div>
+        })}
+      </div>
+    </BaseZoomView>
   );
 };
 

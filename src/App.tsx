@@ -1,17 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { ZoomProvider, useZoom } from './contexts/ZoomContext';
-import { Toaster } from 'react-hot-toast';
+import { ToastProvider } from './contexts/ToastContext';
 import { ExampleRoadmap } from './components/ExampleRoadmap';
-import { getConnectedData } from './data/exampleRoadmapData';
+// Import removed as it's not used directly in this file
 import OutcomeView from './components/zoom-views/OutcomeView';
 
 const App: React.FC = () => {
   return (
     <Router>
-      <ZoomProvider>
-        <AppContent />
-      </ZoomProvider>
+      <ToastProvider>
+        <ZoomProvider>
+          <AppContent />
+        </ZoomProvider>
+      </ToastProvider>
     </Router>
   );
 };
@@ -94,7 +96,6 @@ const AppContent: React.FC = () => {
           <Route path="/public" element={<ExampleRoadmap zoomLevel="objectives" isPublicView />} />
           <Route path="/" element={<ExampleRoadmap zoomLevel="objectives" />} />
         </Routes>
-        <Toaster position="bottom-right" />
       </main>
     </div>
   );

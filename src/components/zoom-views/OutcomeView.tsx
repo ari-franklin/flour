@@ -1,28 +1,165 @@
-import React from 'react';
-import { Link, useParams } from 'react-router-dom';
-
+import React, { useEffect, useState, useCallback } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import BaseZoomView from './BaseZoomView';
 import { 
   ArrowLeft, 
-  BarChart2
+  BarChart2,
+  Loader2
 } from 'lucide-react';
-import { getConnectedData } from '../../data/exampleRoadmapData';
+import { getOutcomeWithMetrics, getOutcomesByObjectiveId } from '../../services/roadmapService';
+import { useToast } from '../../contexts/ToastContext';
 
-// No props needed as we're using context and route params
+// Define the expected structure of the outcome data
+interface OutcomeWithMetrics {
+  id: string;
+  title: string;
+  description?: string;
+  objective_id: string;
+  team_id: string;
+  status: 'now' | 'near' | 'next';
+  is_public: boolean;
+  created_at?: string;
+  updated_at?: string;
+  metrics?: Array<{
+    id: string;
+    name: string;
+    current_value?: number;
+    target_value?: number;
+    unit?: string;
+  }>;
+  bets?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+  }>;
+  objective?: {
+    id: string;
+    title: string;
+  };
+}
 
+// Component to display a single outcome with its metrics and related bets
 const OutcomeView: React.FC = () => {
-  const { outcomeId } = useParams<{ outcomeId: string }>();
-  const { roadmapItems, outcomes } = getConnectedData();
+  const { objectiveId, outcomeId } = useParams<{ objectiveId: string; outcomeId: string }>();
+  const [currentOutcome, setCurrentOutcome] = useState<OutcomeWithMetrics | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { showToast } = useToast();
+  const navigate = useNavigate();
+
+  // Fetch outcome data when the component mounts or outcomeId changes
+  const fetchOutcome = useCallback(async () => {
+    if (!outcomeId || !objectiveId) {
+      console.error('Missing required IDs in OutcomeView');
+      setError('Missing required parameters');
+      setIsLoading(false);
+      showToast({
+        title: 'Error',
+        description: 'Missing required parameters',
+        variant: 'destructive',
+      });
+      navigate('/');
+      return;
+    }
+    
+    console.log('Fetching outcome with ID:', { objectiveId, outcomeId });
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      console.log('Calling getOutcomeWithMetrics...');
+      const { outcome, error } = await getOutcomeWithMetrics(outcomeId);
+      console.log('getOutcomeWithMetrics response:', { outcome, error });
+      
+      if (error) {
+        console.error('Error from getOutcomeWithMetrics:', error);
+        throw new Error(error.message || 'Failed to load outcome data');
+      }
+      
+      if (!outcome) {
+        console.error('No outcome data returned for ID:', outcomeId);
+        throw new Error('Outcome not found');
+      }
+      
+      // If we don't have the objective ID, try to get it from the outcome
+      const effectiveObjectiveId = objectiveId || outcome.objective_id;
+      
+      // If we still don't have an objective ID, try to fetch it from the outcomes list
+      if (!effectiveObjectiveId) {
+        console.log('No objective ID available, fetching outcomes to find it...');
+        const { data: outcomes } = await getOutcomesByObjectiveId('');
+        const foundOutcome = outcomes.find((o: any) => o.id === outcome.id);
+        if (foundOutcome?.objective_id) {
+          // Update the URL with the correct objective ID
+          navigate(`/outcomes/${foundOutcome.objective_id}/outcome/${outcomeId}`, { replace: true });
+          return;
+        }
+      }
+      
+      console.log('Setting current outcome:', outcome);
+      setCurrentOutcome({
+        ...outcome,
+        // Ensure we have the correct objective ID
+        objective_id: effectiveObjectiveId || outcome.objective_id || ''
+      });
+      
+      // Show success toast
+      showToast({
+        title: 'Success',
+        description: 'Outcome data loaded successfully',
+        variant: 'default',
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      console.error('Error in fetchOutcome:', err);
+      setError(errorMessage);
+      
+      // Show error toast
+      showToast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+      
+      // Redirect to the objective view if we have an objective ID
+      if (objectiveId) {
+        navigate(`/outcomes/${objectiveId}`);
+      } else {
+        navigate('/');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [outcomeId, objectiveId, showToast, navigate]);
   
-  // Find the current outcome
-  const currentOutcome = outcomes.find(outcome => outcome.id === outcomeId);
-  
-  if (!currentOutcome) {
+  // Set up the effect to fetch the outcome
+  useEffect(() => {
+    fetchOutcome();
+  }, [fetchOutcome]);
+
+  // Show loading state
+  if (isLoading) {
     return (
       <BaseZoomView 
-        title="Outcome Not Found" 
-        items={roadmapItems}
-        description="The requested outcome could not be found."
+        title="Loading..." 
+        items={[]}
+        description="Loading outcome details..."
+      >
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      </BaseZoomView>
+    );
+  }
+
+  // Show error state
+  if (error || !currentOutcome) {
+    return (
+      <BaseZoomView 
+        title="Error Loading Outcome" 
+        items={[]}
+        description={error || 'The requested outcome could not be found.'}
       >
         <div className="text-center py-12">
           <Link 
@@ -38,10 +175,9 @@ const OutcomeView: React.FC = () => {
   }
 
   // Get all metrics for this outcome (both direct and from its bets)
-  const getOutcomeMetrics = (outcomeId: string) => {
+  const getOutcomeMetrics = () => {
     const directMetrics = currentOutcome.metrics || [];
-    const betMetrics = (roadmapItems || [])
-      .filter((item: any) => item.type === 'bet' && item.outcome_id === outcomeId)
+    const betMetrics = (currentOutcome.bets || [])
       .flatMap((bet: any) => bet.metrics || []);
     
     // Combine and deduplicate metrics by ID
@@ -52,13 +188,13 @@ const OutcomeView: React.FC = () => {
   };
 
   // Get metrics for this outcome
-  const outcomeMetrics = getOutcomeMetrics(currentOutcome.id);
+  const outcomeMetrics = getOutcomeMetrics();
 
   return (
     <BaseZoomView 
       title={currentOutcome.title} 
       description={currentOutcome.description || ''}
-      items={roadmapItems}
+      items={[]} // We don't need all roadmap items in this view
     >
       <div className="space-y-6">
         {/* Metrics Section */}

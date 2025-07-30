@@ -1,7 +1,10 @@
 /*
   # Create roadmap items table and policies
 
-  1. New Tables
+  1. New Types
+    - `roadmap_status` enum ('now', 'near', 'next')
+
+  2. New Tables
     - `roadmap_items`
       - `id` (uuid, primary key)
       - `title` (text)
@@ -11,11 +14,19 @@
       - `status` (roadmap_status)
       - `created_at` (timestamp with time zone, default now())
 
-  2. Security
+  3. Security
     - Enable RLS on `roadmap_items` table
     - Add policies for authenticated users to manage items
     - Add policy for public read access to public items
 */
+
+-- Create roadmap_status type if it doesn't exist
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'roadmap_status') THEN
+    CREATE TYPE roadmap_status AS ENUM ('now', 'near', 'next');
+  END IF;
+END $$;
 
 -- Create roadmap items table
 CREATE TABLE IF NOT EXISTS roadmap_items (

@@ -123,11 +123,9 @@ const KPIDashboard = () => {
   return (
     <div className="kpi-dashboard">
       <div>
-        <h1>Site Standards: Building the foundation for faster features and better experience </h1>
+        <h1>TEAM </h1>
         <p>
-          <strong>
-           We empower Digital teams to confidently build cohesive, high-quality experiences and deliver value fast with reliable tools, clear standards, and frictionless support for web and telemetry.
-          </strong>
+          <strong>Mission</strong>
         </p>
         <h2>Active Focus & Key Performance Indicators</h2>
       </div>
